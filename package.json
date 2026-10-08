@@ -1,0 +1,15 @@
+{
+  "name": "skill-swap-root",
+  "version": "1.0.0",
+  "description": "Skill Swap - Peer-to-Peer Learning Platform",
+  "scripts": {
+    "start:backend": "npm --prefix backend run dev",
+    "start:frontend": "npm --prefix frontend run dev",
+    "test:backend": "npm --prefix backend test",
+    "build:frontend": "npm --prefix frontend run build",
+    "seed": "npm --prefix backend run seed"
+  },
+  "keywords": ["skill-swap", "peer-to-peer", "education"],
+  "author": "SkillSwap Team",
+  "license": "ISC"
+}
