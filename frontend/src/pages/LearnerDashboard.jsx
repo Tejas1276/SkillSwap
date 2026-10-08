@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { ScheduleModal } from '../components/ScheduleModal';
+import { AnimeHeroBackground } from '../components/AnimeHeroBackground';
 import {
   BookOpen,
   Plus,
@@ -103,6 +104,14 @@ export const LearnerDashboard = () => {
           <span>{toastMessage}</span>
         </div>
       )}
+
+      {/* Anime Video Background & Dynamic Story Explainer Banner */}
+      <AnimeHeroBackground
+        onExploreClick={() => {
+          const el = document.getElementById('find-tutors-section');
+          el?.scrollIntoView({ behavior: 'smooth' });
+        }}
+      />
 
       {/* Header Banner */}
       <div className="glass-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
@@ -248,7 +257,7 @@ export const LearnerDashboard = () => {
       </section>
 
       {/* Tutor Discovery Section */}
-      <section>
+      <section id="find-tutors-section">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
           <div>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Find Peer Tutors</h2>

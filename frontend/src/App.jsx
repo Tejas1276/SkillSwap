@@ -6,6 +6,7 @@ import { LearnerDashboard } from './pages/LearnerDashboard';
 import { TutorDashboard } from './pages/TutorDashboard';
 import { SessionsPage } from './pages/SessionsPage';
 import { ProgressPage } from './pages/ProgressPage';
+import { AnimeAmbientBackdrop } from './components/AnimeHeroBackground';
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -26,11 +27,17 @@ function AppContent() {
   }
 
   if (!user) {
-    return <AuthPage />;
+    return (
+      <>
+        <AnimeAmbientBackdrop />
+        <AuthPage />
+      </>
+    );
   }
 
   return (
     <div className="app-layout">
+      <AnimeAmbientBackdrop />
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
       <main className="main-content">
         {activeTab === 'learner' && <LearnerDashboard />}
