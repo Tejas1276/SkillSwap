@@ -11,14 +11,14 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-export const Navbar = ({ activeTab, setActiveTab }) => {
+export const Navbar = ({ activeTab, setActiveTab, onGoHome }) => {
   const { user, logout } = useAuth();
 
   if (!user) return null;
 
   return (
     <header className="navbar">
-      <div className="nav-brand" style={{ cursor: 'pointer' }} onClick={() => setActiveTab('learner')}>
+      <div className="nav-brand" style={{ cursor: 'pointer' }} onClick={onGoHome} title="View Anime Presentation Intro">
         <img
           src="/logo.png"
           alt="Skill Swap Logo"
@@ -28,6 +28,16 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
       </div>
 
       <nav className="nav-tabs">
+        <button
+          className="nav-tab-btn"
+          onClick={onGoHome}
+          style={{ color: '#38bdf8', borderColor: 'rgba(56, 189, 248, 0.3)' }}
+          title="Play continuous anime story slideshow"
+        >
+          <Sparkles size={15} color="#38bdf8" />
+          <span>Anime Intro</span>
+        </button>
+
         <button
           className={`nav-tab-btn ${activeTab === 'learner' ? 'active' : ''}`}
           onClick={() => setActiveTab('learner')}
