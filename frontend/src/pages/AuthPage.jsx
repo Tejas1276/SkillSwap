@@ -55,21 +55,23 @@ export const AuthPage = () => {
       <div style={{ width: '100%', maxWidth: '440px' }}>
         {/* Brand Header */}
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '10px',
-            background: 'rgba(99, 102, 241, 0.15)',
-            border: '1px solid rgba(99, 102, 241, 0.3)',
-            padding: '8px 18px',
-            borderRadius: '9999px',
-            marginBottom: '16px'
-          }}>
-            <Sparkles size={20} color="#818cf8" />
-            <span style={{ fontWeight: 700, fontSize: '1.1rem', color: '#a5b4fc' }}>Skill Swap</span>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+            <img
+              src="/logo.png"
+              alt="Skill Swap"
+              style={{
+                width: '84px',
+                height: '84px',
+                borderRadius: '16px',
+                boxShadow: '0 8px 24px rgba(99, 102, 241, 0.25)',
+                objectFit: 'contain',
+                background: '#ffffff',
+                padding: '6px'
+              }}
+            />
           </div>
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#f8fafc' }}>
-            {isLogin ? 'Welcome Back' : 'Create an Account'}
+            {isLogin ? 'Welcome Back to Skill Swap' : 'Join Skill Swap'}
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '6px' }}>
             {isLogin

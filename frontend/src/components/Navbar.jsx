@@ -18,9 +18,13 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
 
   return (
     <header className="navbar">
-      <div className="nav-brand">
-        <Sparkles size={24} color="#818cf8" />
-        <span>SkillSwap</span>
+      <div className="nav-brand" style={{ cursor: 'pointer' }} onClick={() => setActiveTab('learner')}>
+        <img
+          src="/logo.png"
+          alt="Skill Swap Logo"
+          style={{ width: '36px', height: '36px', borderRadius: '8px', objectFit: 'contain' }}
+        />
+        <span>Skill Swap</span>
       </div>
 
       <nav className="nav-tabs">
