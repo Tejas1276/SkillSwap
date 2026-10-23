@@ -13,6 +13,7 @@ import {
   ArrowRight,
   Clock,
   CheckCircle2,
+  Video,
 } from 'lucide-react';
 
 export const StudentDashboard = ({ onNavigate, onSelectTutor, onBookTutor }) => {
@@ -137,6 +138,56 @@ export const StudentDashboard = ({ onNavigate, onSelectTutor, onBookTutor }) => 
           <div className="credits-pill" style={{ padding: '8px 18px', fontSize: '0.95rem' }}>
             <span>🪙</span>
             <span>{user?.credits ?? 250} Credits</span>
+          </div>
+        </div>
+
+        {/* Next Scheduled Session Banner */}
+        <div style={{
+          background: 'linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%)',
+          border: '1px solid #99f6e4',
+          borderRadius: '14px',
+          padding: '16px 22px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '14px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#0d9488', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Video size={22} />
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Next Scheduled Session
+                </span>
+                <span style={{ background: '#ccfbf1', color: '#0d9488', fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '9999px' }}>
+                  Tomorrow • 3:00 PM
+                </span>
+              </div>
+              <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                Web Development: React State & Custom Hooks with Rohan Sharma
+              </h4>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={() => onNavigate?.('messages')}
+              className="btn-outline-gray"
+              style={{ padding: '8px 16px', fontSize: '0.86rem' }}
+            >
+              Chat Tutor
+            </button>
+            <button
+              onClick={() => onNavigate?.('video')}
+              className="btn-teal"
+              style={{ padding: '8px 18px', fontSize: '0.86rem', gap: '6px' }}
+            >
+              <Video size={16} />
+              <span>Join Video Room</span>
+            </button>
           </div>
         </div>
 

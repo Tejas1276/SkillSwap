@@ -74,19 +74,7 @@ export const AuthPage = ({ onNavigate }) => {
         margin: '0 auto',
         width: '100%',
       }}>
-        {/* Logo Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '32px' }}>
-          <img
-            src="/logo.png"
-            alt="Skill Swap"
-            style={{ width: '40px', height: '40px', objectFit: 'contain' }}
-          />
-          <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a' }}>
-            Skill Swap
-          </span>
-        </div>
-
-        <h1 style={{ fontSize: '1.85rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
+        <h1 style={{ fontSize: '2.1rem', fontWeight: 900, color: '#0f172a', marginBottom: '8px', letterSpacing: '-0.02em' }}>
           {isLogin ? 'Welcome back' : 'Create your account'}
         </h1>
         <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '28px' }}>
@@ -304,18 +292,20 @@ export const AuthPage = ({ onNavigate }) => {
 
         <div style={{
           position: 'absolute',
-          top: '40px',
-          right: '50px',
-          maxWidth: '300px',
+          top: '48px',
+          right: '54px',
+          maxWidth: '360px',
           textAlign: 'right',
         }}>
           <span style={{
-            fontFamily: 'Caveat, cursive, sans-serif',
-            fontSize: '2.5rem',
+            fontFamily: "'Caveat', cursive, sans-serif",
+            fontSize: '3.1rem',
             color: '#ffffff',
             fontWeight: 700,
-            textShadow: '0 2px 10px rgba(0,0,0,0.7)',
-            lineHeight: 1.2,
+            textShadow: '0 3px 18px rgba(0,0,0,0.85), 0 1px 4px rgba(0,0,0,0.9)',
+            lineHeight: 1.15,
+            display: 'block',
+            letterSpacing: '0.01em',
           }}>
             Skills today,<br />opportunities tomorrow
           </span>

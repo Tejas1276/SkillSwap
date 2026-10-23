@@ -80,6 +80,8 @@ function AppContent() {
           <LandingPage
             onNavigate={handleNavigate}
             onSearchSkill={handleSearchSkill}
+            onSelectTutor={handleSelectTutor}
+            onBookTutor={handleBookTutor}
           />
         )}
 

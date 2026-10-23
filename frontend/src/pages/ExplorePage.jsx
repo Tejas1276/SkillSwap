@@ -22,6 +22,7 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
       id: 'rohan-sharma',
       skill: 'Web Development',
       name: 'Rohan Sharma',
+      college: 'Delhi Tech',
       avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150',
       rating: 4.8,
       reviewsCount: 25,
@@ -32,6 +33,7 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
       id: 'priya-singh',
       skill: 'UI/UX Design',
       name: 'Priya Singh',
+      college: 'NID / IIT',
       avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
       rating: 4.7,
       reviewsCount: 18,
@@ -42,6 +44,7 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
       id: 'aman-verma',
       skill: 'Data Science',
       name: 'Aman Verma',
+      college: 'BITS Pilani',
       avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
       rating: 4.9,
       reviewsCount: 31,
@@ -52,6 +55,7 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
       id: 'kritika-jain',
       skill: 'Video Editing',
       name: 'Kritika Jain',
+      college: 'Delhi Univ',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
       rating: 4.9,
       reviewsCount: 15,
@@ -62,6 +66,7 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
       id: 'aditya-rao',
       skill: 'Guitar',
       name: 'Aditya Rao',
+      college: 'IIT Bombay',
       avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150',
       rating: 4.8,
       reviewsCount: 12,
@@ -72,6 +77,7 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
       id: 'arjun-mehta',
       skill: 'Public Speaking',
       name: 'Arjun Mehta',
+      college: 'SRCC',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
       rating: 4.9,
       reviewsCount: 12,
@@ -82,6 +88,7 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
       id: 'nidhi-kapoor',
       skill: 'English Speaking',
       name: 'Nidhi Kapoor',
+      college: 'Ashoka Univ',
       avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150',
       rating: 4.7,
       reviewsCount: 19,
@@ -92,6 +99,7 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
       id: 'rahul-yadav',
       skill: 'DSA (C++)',
       name: 'Rahul Yadav',
+      college: 'DTU CSE',
       avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150',
       rating: 4.8,
       reviewsCount: 26,
@@ -223,9 +231,12 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
                   onSelectTutor?.(tutor);
                   onNavigate?.('profile');
                 }}
-                style={{ fontSize: '0.88rem', color: '#64748b', cursor: 'pointer', marginBottom: '10px' }}
+                style={{ fontSize: '0.88rem', color: '#64748b', cursor: 'pointer', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}
               >
-                {tutor.name}
+                <span style={{ textDecoration: 'underline' }}>{tutor.name}</span>
+                <span style={{ fontSize: '0.74rem', background: '#f1f5f9', color: '#475569', padding: '1px 7px', borderRadius: '4px', fontWeight: 600 }}>
+                  {tutor.college || 'Verified'}
+                </span>
               </div>
 
               {/* Rating */}
