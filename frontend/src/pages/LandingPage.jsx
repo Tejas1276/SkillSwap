@@ -258,8 +258,8 @@ export const LandingPage = ({ onNavigate, onSearchSkill, onSelectTutor, onBookTu
               maxWidth: '540px',
             }}>
               <img
-                src="/students_hero.jpg"
-                alt="Students collaborating"
+                src="/students_hero.jpg?v=anim"
+                alt="Animated students collaborating"
                 style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }}
               />
 
