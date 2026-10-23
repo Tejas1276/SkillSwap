@@ -67,7 +67,7 @@ export const MasterNavbar = ({ activePage, setActivePage }) => {
             {/* Notification Bell */}
             <button
               className="btn-outline-gray"
-              style={{ padding: '8px', borderRadius: '50%', border: 'none', background: 'transparent' }}
+              style={{ padding: '8px', borderRadius: '0px', border: 'none', background: 'transparent' }}
               title="Notifications"
             >
               <Bell size={19} color="#475569" />
@@ -89,7 +89,7 @@ export const MasterNavbar = ({ activePage, setActivePage }) => {
                 style={{
                   width: '36px',
                   height: '36px',
-                  borderRadius: '50%',
+                  borderRadius: '0px',
                   objectFit: 'cover',
                   border: '2px solid #e2e8f0',
                 }}
