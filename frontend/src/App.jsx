@@ -33,7 +33,6 @@ function AppContent() {
   });
   const [activeVideoSession, setActiveVideoSession] = useState(null);
   const [initialSearch, setInitialSearch] = useState('');
-  const [showDemoNav, setShowDemoNav] = useState(true);
 
   // Handlers
   const handleNavigate = (page) => {
@@ -150,84 +149,6 @@ function AppContent() {
           />
         )}
       </div>
-
-      {/* Floating Presentation Helper: Direct 1-Click Screen Switcher */}
-      {showDemoNav && (
-        <aside
-          aria-label="Presentation 9-Screen Switcher"
-          style={{
-            position: 'fixed',
-            bottom: '16px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: 'rgba(15, 23, 42, 0.94)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            boxShadow: '0 12px 32px rgba(0, 0, 0, 0.35)',
-            borderRadius: '9999px',
-            padding: '6px 12px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            zIndex: 9999,
-          }}
-        >
-          <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#38bdf8', paddingRight: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            9 Screens:
-          </span>
-
-          {[
-            { id: 'home', num: '1', label: 'Landing' },
-            { id: 'auth', num: '2', label: 'Sign Up' },
-            { id: 'dashboard', num: '3', label: 'Dashboard' },
-            { id: 'explore', num: '4', label: 'Explore' },
-            { id: 'profile', num: '5', label: 'Profile' },
-            { id: 'book', num: '6', label: 'Book' },
-            { id: 'video', num: '7', label: 'Video Call' },
-            { id: 'leaderboard', num: '8', label: 'Leaderboard' },
-            { id: 'messages', num: '9', label: 'Messages' },
-          ].map((screen) => {
-            const isActive = activePage === screen.id || (screen.id === 'book' && activePage === 'sessions');
-            return (
-              <button
-                key={screen.id}
-                onClick={() => handleNavigate(screen.id)}
-                style={{
-                  background: isActive ? '#0d9488' : 'rgba(255, 255, 255, 0.08)',
-                  color: isActive ? '#ffffff' : '#94a3b8',
-                  border: isActive ? '1px solid #14b8a6' : '1px solid transparent',
-                  padding: '5px 10px',
-                  borderRadius: '9999px',
-                  fontSize: '0.76rem',
-                  fontWeight: isActive ? 700 : 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  whiteSpace: 'nowrap',
-                }}
-                title={`Jump directly to Screen ${screen.num}: ${screen.label}`}
-              >
-                <span style={{ opacity: 0.7, marginRight: '4px' }}>{screen.num}</span>
-                <span>{screen.label}</span>
-              </button>
-            );
-          })}
-
-          <button
-            onClick={() => setShowDemoNav(false)}
-            style={{
-              background: 'transparent',
-              color: '#64748b',
-              fontSize: '0.75rem',
-              padding: '2px 6px',
-              marginLeft: '4px',
-              borderRadius: '50%',
-            }}
-            title="Minimize"
-          >
-            ✕
-          </button>
-        </aside>
-      )}
     </div>
   );
 }
