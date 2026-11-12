@@ -126,4 +126,19 @@ export const api = {
     getHistory: () => request('/gamification/history'),
     getLeaderboard: () => request('/gamification/leaderboard'),
   },
+
+  // Phase 4: AI Skill Matching & Recommendation Engine API
+  ai: {
+    getHealth: () => request('/ai/health'),
+    getRecommendations: (params = {}) => {
+      const query = new URLSearchParams(params).toString();
+      return request(`/ai/recommendations${query ? `?${query}` : ''}`);
+    },
+    getLearningPath: (goalSkill) =>
+      request('/ai/learning-path', {
+        method: 'POST',
+        body: JSON.stringify({ goalSkill }),
+      }),
+    getTrendingSkills: (limit = 6) => request(`/ai/trending?limit=${limit}`),
+  },
 };

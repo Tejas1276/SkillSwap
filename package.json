@@ -9,6 +9,8 @@
     "frontend": "npm --prefix frontend run dev",
     "start:backend": "npm --prefix backend start",
     "start:frontend": "npm --prefix frontend run dev",
+    "start:ai": "ai-engine\\.venv\\Scripts\\python.exe ai-engine\\main.py",
+    "test:ai": "ai-engine\\.venv\\Scripts\\pytest.exe ai-engine",
     "test:backend": "npm --prefix backend test",
     "build:frontend": "npm --prefix frontend run build",
     "seed": "npm --prefix backend run seed"

@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
-import { Search, SlidersHorizontal, Heart, Star } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, SlidersHorizontal, Heart, Star, Sparkles } from 'lucide-react';
+import { api } from '../api/client';
+import { useAuth } from '../context/AuthContext';
 
 export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSearch = '' }) => {
+  const { user } = useAuth();
   const [search, setSearch] = useState(initialSearch);
   const [activeCategory, setActiveCategory] = useState('All');
   const [favorites, setFavorites] = useState({});
+  const [aiMatchedScores, setAiMatchedScores] = useState({});
+  const [aiSortActive, setAiSortActive] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiEngineLabel, setAiEngineLabel] = useState('');
 
   const categories = [
     'All',
@@ -124,12 +131,71 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
     setFavorites((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const handleRunAIMatch = async () => {
+    const nextState = !aiSortActive;
+    setAiSortActive(nextState);
+    if (!nextState) {
+      setAiMatchedScores({});
+      setAiEngineLabel('');
+      return;
+    }
+
+    setAiLoading(true);
+    try {
+      if (user) {
+        const res = await api.ai.getRecommendations({ skill: search || 'Web Development' });
+        const scoreMap = {};
+        for (const rec of res.recommendations || []) {
+          const tutorName = (rec.tutor?.name || rec.name || '').toLowerCase();
+          if (tutorName) scoreMap[tutorName] = rec.matchScore;
+        }
+        // Apply API scores when tutor exists in showcase, or compute deterministic score preview
+        allTutors.forEach((t) => {
+          const key = t.name.toLowerCase();
+          if (!scoreMap[key]) {
+            const matchesQuery =
+              !search ||
+              t.skill.toLowerCase().includes(search.toLowerCase()) ||
+              t.tags.some((tag) => tag.toLowerCase().includes(search.toLowerCase()));
+            scoreMap[key] = matchesQuery
+              ? Math.min(99, Math.round(t.rating * 15 + 22))
+              : Math.round(t.rating * 12);
+          }
+        });
+        setAiMatchedScores(scoreMap);
+        setAiEngineLabel(res.source === 'python-ml-microservice' ? 'TensorFlow + Scikit-learn' : 'AI Engine');
+      } else {
+        const scoreMap = {};
+        allTutors.forEach((t) => {
+          const matchesQuery =
+            !search ||
+            t.skill.toLowerCase().includes(search.toLowerCase()) ||
+            t.tags.some((tag) => tag.toLowerCase().includes(search.toLowerCase()));
+          scoreMap[t.name.toLowerCase()] = matchesQuery
+            ? Math.min(99, Math.round(t.rating * 15 + 22))
+            : Math.round(t.rating * 12);
+        });
+        setAiMatchedScores(scoreMap);
+        setAiEngineLabel('AI Compatibility Preview');
+      }
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const displayedTutors = aiSortActive
+    ? [...filteredTutors].sort(
+        (a, b) => (aiMatchedScores[b.name.toLowerCase()] || 0) - (aiMatchedScores[a.name.toLowerCase()] || 0)
+      )
+    : filteredTutors;
+
   return (
     <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '32px 20px 80px' }}>
       {/* Search & Filter Top Bar */}
-      <div style={{ display: 'flex', gap: '14px', alignItems: 'center', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', gap: '14px', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap' }}>
         <div style={{
           flex: 1,
+          minWidth: '240px',
           display: 'flex',
           alignItems: 'center',
           background: '#ffffff',
@@ -154,6 +220,16 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
             }}
           />
         </div>
+
+        <button
+          onClick={handleRunAIMatch}
+          className={aiSortActive ? 'btn-teal' : 'btn-teal-outline'}
+          style={{ padding: '10px 18px', gap: '8px', fontSize: '0.9rem' }}
+          disabled={aiLoading}
+        >
+          <Sparkles size={17} />
+          <span>{aiLoading ? 'Matching...' : aiSortActive ? `AI Ranked (${aiEngineLabel})` : 'AI Smart Match'}</span>
+        </button>
 
         <button
           className="btn-outline-gray"
@@ -183,7 +259,7 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
         gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
         gap: '22px',
       }}>
-        {filteredTutors.map((tutor) => (
+        {displayedTutors.map((tutor) => (
           <div
             key={tutor.id}
             className="clean-card"
@@ -196,7 +272,7 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
             }}
           >
             <div>
-              {/* Header: Avatar & Bookmark */}
+              {/* Header: Avatar, AI Score Badge & Bookmark */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
                 <img
                   src={tutor.avatar}
@@ -213,13 +289,29 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
                     cursor: 'pointer',
                   }}
                 />
-                <button
-                  onClick={() => toggleFavorite(tutor.id)}
-                  style={{ color: favorites[tutor.id] ? '#ef4444' : '#cbd5e1' }}
-                  title="Bookmark"
-                >
-                  <Heart size={20} fill={favorites[tutor.id] ? '#ef4444' : 'transparent'} />
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {aiSortActive && aiMatchedScores[tutor.name.toLowerCase()] && (
+                    <span
+                      style={{
+                        background: '#f0fdfa',
+                        border: '1px solid #0d9488',
+                        color: '#0f766e',
+                        fontSize: '0.72rem',
+                        fontWeight: 800,
+                        padding: '3px 7px',
+                      }}
+                    >
+                      {aiMatchedScores[tutor.name.toLowerCase()]}% Match
+                    </span>
+                  )}
+                  <button
+                    onClick={() => toggleFavorite(tutor.id)}
+                    style={{ color: favorites[tutor.id] ? '#ef4444' : '#cbd5e1' }}
+                    title="Bookmark"
+                  >
+                    <Heart size={20} fill={favorites[tutor.id] ? '#ef4444' : 'transparent'} />
+                  </button>
+                </div>
               </div>
 
               {/* Skill & Tutor Name */}

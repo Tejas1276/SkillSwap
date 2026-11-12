@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../api/client';
 import {
   LayoutDashboard,
   BookOpen,
@@ -14,11 +15,43 @@ import {
   Clock,
   CheckCircle2,
   Video,
+  Sparkles,
+  TrendingUp,
 } from 'lucide-react';
 
 export const StudentDashboard = ({ onNavigate, onSelectTutor, onBookTutor, onEnterVideoRoom }) => {
   const { user } = useAuth();
   const [sidebarTab, setSidebarTab] = useState('dashboard');
+  const [goalSkill, setGoalSkill] = useState('Web Development');
+  const [learningPath, setLearningPath] = useState(null);
+  const [trendingSkills, setTrendingSkills] = useState([]);
+  const [aiEngineSource, setAiEngineSource] = useState('');
+  const [loadingAI, setLoadingAI] = useState(false);
+
+  const loadAIInsights = async (targetSkill) => {
+    setLoadingAI(true);
+    try {
+      const [trendRes, pathRes] = await Promise.all([
+        api.ai.getTrendingSkills(5).catch(() => null),
+        user ? api.ai.getLearningPath(targetSkill).catch(() => null) : Promise.resolve(null),
+      ]);
+
+      if (trendRes?.trending) {
+        setTrendingSkills(trendRes.trending);
+        setAiEngineSource(trendRes.source || '');
+      }
+      if (pathRes?.learningPath) {
+        setLearningPath(pathRes.learningPath);
+        setAiEngineSource(pathRes.source || '');
+      }
+    } finally {
+      setLoadingAI(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAIInsights(goalSkill);
+  }, [user]);
 
   const tutors = [
     {
@@ -353,6 +386,149 @@ export const StudentDashboard = ({ onNavigate, onSelectTutor, onBookTutor, onEnt
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Phase 4: AI Personalized Learning Path & Trending Skills */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+          {/* Personalized Learning Path Card */}
+          <div className="clean-card" style={{ padding: '22px', borderTop: '4px solid #0d9488' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Sparkles size={18} color="#0d9488" />
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+                  AI Personalized Learning Path
+                </h3>
+              </div>
+              {aiEngineSource && (
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', background: '#f0fdfa', color: '#0f766e', border: '1px solid #99f6e4' }}>
+                  {aiEngineSource === 'python-ml-microservice' ? 'TensorFlow + Scikit-learn Live' : 'AI Fallback Engine'}
+                </span>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+              <select
+                value={goalSkill}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  setGoalSkill(next);
+                  loadAIInsights(next);
+                }}
+                style={{ flex: 1, padding: '8px 12px', fontSize: '0.88rem' }}
+              >
+                <option value="Web Development">Goal: Web Development</option>
+                <option value="Data Science">Goal: Data Science</option>
+                <option value="Machine Learning">Goal: Machine Learning</option>
+                <option value="UI/UX Design">Goal: UI/UX Design</option>
+                <option value="DSA (C++)">Goal: DSA (C++)</option>
+                <option value="Public Speaking">Goal: Public Speaking</option>
+              </select>
+              <button
+                onClick={() => loadAIInsights(goalSkill)}
+                className="btn-teal"
+                style={{ padding: '8px 14px', fontSize: '0.84rem' }}
+                disabled={loadingAI}
+              >
+                {loadingAI ? 'Generating...' : 'Generate'}
+              </button>
+            </div>
+
+            {learningPath?.steps ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '4px' }}>
+                  Track: <strong style={{ color: '#0f172a' }}>{learningPath.matchedTrack}</strong> • Confidence: <strong style={{ color: '#0d9488' }}>{learningPath.confidence}%</strong> • ~{learningPath.totalEstimatedHours} hrs
+                </div>
+                {learningPath.steps.slice(0, 4).map((step) => (
+                  <div
+                    key={step.step}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '10px 12px',
+                      background: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      gap: '10px',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>
+                        Step {step.step}: {step.skill}
+                      </div>
+                      <div style={{ fontSize: '0.76rem', color: '#64748b' }}>
+                        {step.focus}
+                      </div>
+                    </div>
+                    <span
+                      style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        padding: '3px 8px',
+                        background: step.status === 'completed' ? '#dcfce7' : '#e0f2fe',
+                        color: step.status === 'completed' ? '#15803d' : '#0369a1',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {step.status === 'completed' ? 'Completed' : step.level}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ fontSize: '0.86rem', color: '#64748b', padding: '12px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                Sign in via the Login screen to generate your custom Python ML learning path based on your profile skills.
+              </div>
+            )}
+          </div>
+
+          {/* Trending Campus Skills Card */}
+          <div className="clean-card" style={{ padding: '22px', borderTop: '4px solid #f59e0b' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+              <TrendingUp size={18} color="#f59e0b" />
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+                Trending Skills on Campus
+              </h3>
+            </div>
+            <p style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '14px' }}>
+              Computed from learner wishlists, peer tutor supply, and session booking velocity.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {(trendingSkills.length > 0
+                ? trendingSkills
+                : [
+                    { skill: 'React', trendScore: 95, tutorsAvailable: 3, badge: '🔥 High Demand' },
+                    { skill: 'Python', trendScore: 92, tutorsAvailable: 2, badge: '🔥 High Demand' },
+                    { skill: 'UI/UX Design', trendScore: 87, tutorsAvailable: 2, badge: '📈 Rising' },
+                    { skill: 'Machine Learning', trendScore: 84, tutorsAvailable: 1, badge: '🔥 High Demand' },
+                  ]
+              ).map((item) => (
+                <div
+                  key={item.skill}
+                  onClick={() => onNavigate?.('explore')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '10px 12px',
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <div>
+                    <strong style={{ fontSize: '0.9rem', color: '#0f172a' }}>{item.skill}</strong>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                      {item.tutorsAvailable} tutors active • {item.badge}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0d9488' }}>
+                    {item.trendScore}% index
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </main>

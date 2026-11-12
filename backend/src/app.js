@@ -10,6 +10,7 @@ const tutorRoutes = require('./routes/tutorRoutes');
 const sessionRoutes = require('./routes/sessionRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
 const gamificationRoutes = require('./routes/gamificationRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use('/api/tutor', tutorRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/gamification', gamificationRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Catch-all for undefined routes
 app.use('*', (req, res) => {

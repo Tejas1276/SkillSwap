@@ -6,3 +6,8 @@ dist
 build
 coverage
 .vscode
+.venv
+ai-engine/.venv
+__pycache__
+*.pyc
+.pytest_cache
