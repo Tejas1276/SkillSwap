@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, SlidersHorizontal, Heart, Star, Sparkles } from 'lucide-react';
+import { SlidersHorizontal, Heart, Star, Sparkles } from 'lucide-react';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { SkillSearchAutocomplete } from '../components/SkillSearchAutocomplete';

@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
         try {
           const data = await api.auth.getMe();
           setUser(data.user);
-        } catch (err) {
+        } catch {
           console.warn('Token expired or invalid, logging out.');
           localStorage.removeItem('skillswap_token');
           setToken(null);

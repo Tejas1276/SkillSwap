@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { ArrowRight, Sparkles, Check } from 'lucide-react';
 
 export const AuthPage = ({ onNavigate }) => {
   const { login, register, error } = useAuth();

@@ -14,8 +14,6 @@ import {
   Users,
   Award,
   ArrowRight,
-  Clock,
-  CheckCircle2,
   Video,
   Sparkles,
   TrendingUp,

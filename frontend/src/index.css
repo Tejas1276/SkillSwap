@@ -261,22 +261,6 @@ input:focus, select:focus, textarea:focus {
   font-weight: 600;
 }
 
-/* Layout Containers */
-.page-container {
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 32px 24px 64px;
-}
-
-/* Video Call Theater Dark Mode (Screen 7) */
-.video-theater-container {
-  background: #090d16;
-  color: #ffffff;
-  min-height: calc(100vh - 65px);
-  display: flex;
-  flex-direction: column;
-}
-
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;

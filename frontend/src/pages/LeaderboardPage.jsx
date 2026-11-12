@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Award,
   BookOpen,
-  Zap,
   Shield,
   Flame,
   Lock,

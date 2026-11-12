@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import { SessionCard } from '../components/SessionCard';
 import { FeedbackModal } from '../components/FeedbackModal';
-import { Calendar, Filter, CheckCircle } from 'lucide-react';
+import { Calendar, CheckCircle } from 'lucide-react';
 
 export const SessionsPage = ({ onEnterVideoRoom }) => {
   const [sessions, setSessions] = useState([]);

@@ -1,17 +1,12 @@
 import React, { useState } from 'react';
 import { SkillSearchAutocomplete } from '../components/SkillSearchAutocomplete';
 import {
-  Search,
   ArrowRight,
-  Sparkles,
   CheckCircle2,
   BookOpen,
   Coins,
   Video,
-  ShieldCheck,
   Star,
-  Users,
-  Award,
 } from 'lucide-react';
 
 export const LandingPage = ({ onNavigate, onSearchSkill, onSelectTutor, onBookTutor }) => {
