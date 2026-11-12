@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { SkillSearchAutocomplete } from '../components/SkillSearchAutocomplete';
 import {
   Search,
   ArrowRight,
@@ -127,52 +128,26 @@ export const LandingPage = ({ onNavigate, onSearchSkill, onSelectTutor, onBookTu
               Skill Swap connects students across campus to exchange skills, learn from peers, and grow together through interactive in-app video sessions.
             </p>
 
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} style={{
-              display: 'flex',
-              alignItems: 'center',
-              background: '#ffffff',
-              border: '2px solid #0d9488',
-              borderRadius: '12px',
-              padding: '6px 8px 6px 18px',
-              boxShadow: '0 4px 14px rgba(13, 148, 136, 0.12)',
-              maxWidth: '540px',
-              marginBottom: '24px',
-            }}>
-              <input
-                type="text"
-                placeholder="Search skills (e.g. Web Development, Design, Music...)"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  flex: 1,
-                  border: 'none',
-                  outline: 'none',
-                  fontSize: '0.98rem',
-                  color: '#0f172a',
-                  background: 'transparent',
-                  padding: '8px 0',
-                }}
-              />
-              <button
-                type="submit"
-                style={{
-                  background: '#0d9488',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '8px',
-                  width: '44px',
-                  height: '44px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  transition: 'background 0.15s ease',
-                }}
-              >
-                <Search size={20} />
-              </button>
-            </form>
+            {/* Search Bar with Live Autocomplete Suggestions */}
+            <SkillSearchAutocomplete
+              variant="hero"
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Search skills (e.g. Web Development, Python, Design...)"
+              onSubmit={handleSearch}
+              onSelectSuggestion={(item) => {
+                if (item.type === 'tutor') {
+                  const found = featuredTutors.find((t) => t.name === item.label);
+                  if (found) {
+                    onSelectTutor?.(found);
+                    onNavigate?.('profile');
+                    return;
+                  }
+                }
+                onSearchSkill?.(item.label);
+                onNavigate?.('explore');
+              }}
+            />
 
             {/* Popular Skill Pills */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', maxWidth: '540px', marginBottom: '40px' }}>

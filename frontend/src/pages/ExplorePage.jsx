@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, SlidersHorizontal, Heart, Star, Sparkles } from 'lucide-react';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { SkillSearchAutocomplete } from '../components/SkillSearchAutocomplete';
 
 export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSearch = '' }) => {
   const { user } = useAuth();
@@ -12,6 +13,12 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
   const [aiSortActive, setAiSortActive] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiEngineLabel, setAiEngineLabel] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [minRating, setMinRating] = useState(0);
+
+  useEffect(() => {
+    setSearch(initialSearch);
+  }, [initialSearch]);
 
   const categories = [
     'All',
@@ -124,7 +131,9 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
     const matchesCategory =
       activeCategory === 'All' || t.category === activeCategory;
 
-    return matchesSearch && matchesCategory;
+    const matchesRating = t.rating >= minRating;
+
+    return matchesSearch && matchesCategory && matchesRating;
   });
 
   const toggleFavorite = (id) => {
@@ -192,34 +201,24 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
   return (
     <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '32px 20px 80px' }}>
       {/* Search & Filter Top Bar */}
-      <div style={{ display: 'flex', gap: '14px', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap' }}>
-        <div style={{
-          flex: 1,
-          minWidth: '240px',
-          display: 'flex',
-          alignItems: 'center',
-          background: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: '10px',
-          padding: '10px 16px',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-        }}>
-          <Search size={18} color="#94a3b8" style={{ marginRight: '10px' }} />
-          <input
-            type="text"
-            placeholder="Search for a skill or person..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{
-              flex: 1,
-              border: 'none',
-              background: 'transparent',
-              outline: 'none',
-              fontSize: '0.94rem',
-              color: '#0f172a',
-            }}
-          />
-        </div>
+      <div style={{ display: 'flex', gap: '14px', alignItems: 'center', marginBottom: showFilters ? '12px' : '20px', flexWrap: 'wrap' }}>
+        <SkillSearchAutocomplete
+          variant="explore"
+          value={search}
+          onChange={setSearch}
+          placeholder="Search for a skill, tag, or tutor name..."
+          onSelectSuggestion={(item) => {
+            if (item.category && item.category !== activeCategory) {
+              setActiveCategory('All');
+            }
+            if (item.type === 'tutor') {
+              const found = allTutors.find((t) => t.name === item.label);
+              if (found) {
+                setSearch(found.name);
+              }
+            }
+          }}
+        />
 
         <button
           onClick={handleRunAIMatch}
@@ -232,13 +231,43 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
         </button>
 
         <button
-          className="btn-outline-gray"
+          onClick={() => setShowFilters(!showFilters)}
+          className={showFilters ? 'btn-teal' : 'btn-outline-gray'}
           style={{ padding: '10px 18px', gap: '8px', fontSize: '0.9rem' }}
         >
-          <SlidersHorizontal size={17} color="#475569" />
-          <span>Filters</span>
+          <SlidersHorizontal size={17} />
+          <span>Filters {minRating > 0 ? `(★ ${minRating}+)` : ''}</span>
         </button>
       </div>
+
+      {/* Expandable Rating Filter Bar */}
+      {showFilters && (
+        <div
+          style={{
+            background: '#ffffff',
+            border: '1px solid #e2e8f0',
+            padding: '12px 16px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            flexWrap: 'wrap',
+          }}
+        >
+          <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#475569' }}>
+            Minimum Rating:
+          </span>
+          {[0, 4.7, 4.8, 4.9].map((val) => (
+            <button
+              key={val}
+              onClick={() => setMinRating(val)}
+              className={`filter-chip ${minRating === val ? 'active' : ''}`}
+            >
+              {val === 0 ? 'Any Rating' : `⭐ ${val}+`}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Category Filter Pills */}
       <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '32px' }}>
