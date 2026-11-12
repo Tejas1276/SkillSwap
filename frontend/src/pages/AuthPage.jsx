@@ -1,11 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../api/client';
+import { MailCheck, ExternalLink, RotateCcw } from 'lucide-react';
 
 export const AuthPage = ({ onNavigate, initialMode = 'signup' }) => {
-  const { login, register, error } = useAuth();
+  const { login, register, sendOtp, verifyOtp, error } = useAuth();
   const [isLogin, setIsLogin] = useState(initialMode === 'login');
+  const [otpStep, setOtpStep] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [otpMeta, setOtpMeta] = useState(null); // { message, deliveryMode, previewUrl }
+  const [providers, setProviders] = useState({
+    googleConfigured: false,
+    githubConfigured: false,
+    smtpConfigured: false,
+  });
+
   const [formData, setFormData] = useState({
     name: '',
+    username: '',
     college: '',
     email: '',
     password: '',
@@ -15,8 +27,20 @@ export const AuthPage = ({ onNavigate, initialMode = 'signup' }) => {
 
   useEffect(() => {
     setIsLogin(initialMode === 'login');
+    setOtpStep(false);
+    setOtpCode('');
+    setOtpMeta(null);
     setFormError('');
   }, [initialMode]);
+
+  useEffect(() => {
+    api.auth
+      .getProviders()
+      .then((res) => {
+        if (res?.providers) setProviders(res.providers);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,18 +49,43 @@ export const AuthPage = ({ onNavigate, initialMode = 'signup' }) => {
 
     try {
       if (isLogin) {
-        await login(formData.email, formData.password);
+        await login(formData.email.trim(), formData.password);
+        onNavigate?.('dashboard');
+      } else if (!otpStep) {
+        const res = await sendOtp({
+          name: formData.name.trim(),
+          username: formData.username.trim().toLowerCase(),
+          email: formData.email.trim(),
+          password: formData.password,
+          bio: formData.college ? `Student at ${formData.college.trim()}` : '',
+        });
+        setOtpMeta(res);
+        setOtpStep(true);
       } else {
-        await register(
-          formData.name,
-          formData.email,
-          formData.password,
-          formData.college ? `Student at ${formData.college}` : ''
-        );
+        await verifyOtp(formData.email.trim(), otpCode.trim());
+        onNavigate?.('dashboard');
       }
-      onNavigate?.('dashboard');
     } catch (err) {
       setFormError(err.message || 'Authentication failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setFormError('');
+    setLoading(true);
+    try {
+      const res = await sendOtp({
+        name: formData.name.trim(),
+        username: formData.username.trim().toLowerCase(),
+        email: formData.email.trim(),
+        password: formData.password,
+        bio: formData.college ? `Student at ${formData.college.trim()}` : '',
+      });
+      setOtpMeta(res);
+    } catch (err) {
+      setFormError(err.message || 'Failed to resend OTP');
     } finally {
       setLoading(false);
     }
@@ -49,7 +98,6 @@ export const AuthPage = ({ onNavigate, initialMode = 'signup' }) => {
       await login(email, password);
       onNavigate?.('dashboard');
     } catch {
-      // If user not registered yet, register them
       try {
         await register(name, email, password, 'Skill Swap Member');
         onNavigate?.('dashboard');
@@ -61,41 +109,74 @@ export const AuthPage = ({ onNavigate, initialMode = 'signup' }) => {
     }
   };
 
+  const handleOAuthLogin = (provider) => {
+    setFormError('');
+    window.location.href = `/api/auth/${provider}`;
+  };
+
   return (
-    <div style={{
-      minHeight: 'calc(100vh - 65px)',
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
-      backgroundColor: '#ffffff',
-    }}>
+    <div
+      style={{
+        minHeight: 'calc(100vh - 65px)',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
+        backgroundColor: '#ffffff',
+      }}
+    >
       {/* Left Form Column */}
-      <div style={{
-        padding: '48px 60px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        maxWidth: '560px',
-        margin: '0 auto',
-        width: '100%',
-      }}>
-        <h1 style={{ fontSize: '2.1rem', fontWeight: 900, color: '#0f172a', marginBottom: '8px', letterSpacing: '-0.02em' }}>
-          {isLogin ? 'Welcome back' : 'Create your account'}
-        </h1>
-        <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '28px' }}>
+      <div
+        style={{
+          padding: '44px 56px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          maxWidth: '580px',
+          margin: '0 auto',
+          width: '100%',
+        }}
+      >
+        <h1
+          style={{
+            fontSize: '2.1rem',
+            fontWeight: 900,
+            color: '#0f172a',
+            marginBottom: '8px',
+            letterSpacing: '-0.02em',
+          }}
+        >
           {isLogin
-            ? 'Sign in to access your dashboard and sessions.'
-            : 'Join a community of learners and teachers.'}
+            ? 'Welcome back'
+            : otpStep
+              ? 'Verify your email'
+              : 'Create your account'}
+        </h1>
+        <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '24px' }}>
+          {isLogin
+            ? 'Sign in with your email, username, Google, or GitHub.'
+            : otpStep
+              ? `Enter the 6-digit OTP sent to ${formData.email}`
+              : 'Sign up with email + username (OTP verified) or connect Google/GitHub.'}
         </p>
 
         {/* Quick Demo Persona Chips for instant evaluator testing */}
-        <div style={{
-          background: '#f8fafc',
-          border: '1px solid #e2e8f0',
-          borderRadius: '10px',
-          padding: '10px 14px',
-          marginBottom: '20px',
-        }}>
-          <span style={{ display: 'block', fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '6px' }}>
+        <div
+          style={{
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            padding: '10px 14px',
+            marginBottom: '18px',
+          }}
+        >
+          <span
+            style={{
+              display: 'block',
+              fontSize: '0.74rem',
+              fontWeight: 700,
+              color: '#64748b',
+              textTransform: 'uppercase',
+              marginBottom: '6px',
+            }}
+          >
             ⚡ 1-Click Presentation Personas:
           </span>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -108,7 +189,6 @@ export const AuthPage = ({ onNavigate, initialMode = 'signup' }) => {
                 fontSize: '0.78rem',
                 fontWeight: 600,
                 padding: '4px 10px',
-                borderRadius: '6px',
               }}
             >
               Tejas Kushwaha (Student)
@@ -123,7 +203,6 @@ export const AuthPage = ({ onNavigate, initialMode = 'signup' }) => {
                 fontSize: '0.78rem',
                 fontWeight: 600,
                 padding: '4px 10px',
-                borderRadius: '6px',
               }}
             >
               Rohan Sharma (Tutor)
@@ -138,7 +217,6 @@ export const AuthPage = ({ onNavigate, initialMode = 'signup' }) => {
                 fontSize: '0.78rem',
                 fontWeight: 600,
                 padding: '4px 10px',
-                borderRadius: '6px',
               }}
             >
               Priya Singh (Designer)
@@ -147,28 +225,39 @@ export const AuthPage = ({ onNavigate, initialMode = 'signup' }) => {
         </div>
 
         {(formError || error) && (
-          <div style={{
-            background: '#fef2f2',
-            color: '#b91c1c',
-            border: '1px solid #fecaca',
-            padding: '10px 14px',
-            borderRadius: '8px',
-            marginBottom: '16px',
-            fontSize: '0.88rem',
-          }}>
+          <div
+            style={{
+              background: '#fef2f2',
+              color: '#b91c1c',
+              border: '1px solid #fecaca',
+              padding: '10px 14px',
+              marginBottom: '16px',
+              fontSize: '0.88rem',
+            }}
+          >
             {formError || error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {!isLogin && (
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {!isLogin && !otpStep && (
             <>
-              <div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <input
                   type="text"
                   placeholder="Full Name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  style={{ width: '100%', padding: '12px 14px' }}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Username (e.g. aarav_dev)"
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  pattern="[a-zA-Z0-9_.\-]{3,30}"
+                  title="3-30 characters: letters, numbers, _, ., -"
                   style={{ width: '100%', padding: '12px 14px' }}
                   required
                 />
@@ -186,27 +275,120 @@ export const AuthPage = ({ onNavigate, initialMode = 'signup' }) => {
             </>
           )}
 
-          <div>
-            <input
-              type="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              style={{ width: '100%', padding: '12px 14px' }}
-              required
-            />
-          </div>
+          {!otpStep ? (
+            <>
+              <div>
+                <input
+                  type={isLogin ? 'text' : 'email'}
+                  placeholder={isLogin ? 'Email or Username' : 'Email Address'}
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  style={{ width: '100%', padding: '12px 14px' }}
+                  required
+                />
+              </div>
 
-          <div>
-            <input
-              type="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              style={{ width: '100%', padding: '12px 14px' }}
-              required
-            />
-          </div>
+              <div>
+                <input
+                  type="password"
+                  placeholder="Password (min. 6 characters)"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  minLength={6}
+                  style={{ width: '100%', padding: '12px 14px' }}
+                  required
+                />
+              </div>
+            </>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div
+                style={{
+                  background: '#f0fdfa',
+                  border: '1px solid #99f6e4',
+                  padding: '12px 14px',
+                  fontSize: '0.86rem',
+                  color: '#0f766e',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '10px',
+                }}
+              >
+                <MailCheck size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
+                <div>
+                  <div>
+                    <strong>{otpMeta?.message || `OTP sent to ${formData.email}`}</strong>
+                  </div>
+                  {otpMeta?.deliveryMode === 'ethereal' && otpMeta?.previewUrl && (
+                    <a
+                      href={otpMeta.previewUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        marginTop: '6px',
+                        color: '#0d9488',
+                        fontWeight: 700,
+                        textDecoration: 'underline',
+                      }}
+                    >
+                      <span>Open Sent OTP Email (Ethereal Inbox)</span>
+                      <ExternalLink size={13} />
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                placeholder="Enter 6-digit Email OTP"
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  fontSize: '1.2rem',
+                  fontWeight: 800,
+                  letterSpacing: '0.35em',
+                  textAlign: 'center',
+                }}
+                required
+              />
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.84rem' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOtpStep(false);
+                    setOtpCode('');
+                    setFormError('');
+                  }}
+                  style={{ color: '#64748b', fontWeight: 600 }}
+                >
+                  ← Change details / email
+                </button>
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={handleResendOtp}
+                  style={{
+                    color: '#0d9488',
+                    fontWeight: 700,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  <RotateCcw size={13} />
+                  <span>Resend OTP</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           <button
             type="submit"
@@ -214,59 +396,98 @@ export const AuthPage = ({ onNavigate, initialMode = 'signup' }) => {
             disabled={loading}
             style={{ width: '100%', padding: '12px', fontSize: '0.98rem', marginTop: '4px' }}
           >
-            {loading ? 'Please wait...' : isLogin ? 'Login' : 'Sign Up'}
+            {loading
+              ? 'Please wait...'
+              : isLogin
+                ? 'Login'
+                : otpStep
+                  ? 'Verify OTP & Create Account'
+                  : 'Send Email OTP'}
           </button>
         </form>
 
         {/* Divider */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          margin: '22px 0',
-          color: '#94a3b8',
-          fontSize: '0.85rem',
-        }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            margin: '20px 0',
+            color: '#94a3b8',
+            fontSize: '0.85rem',
+          }}
+        >
           <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
           <span>or</span>
           <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
         </div>
 
-        {/* Social Auth Buttons */}
+        {/* Real OAuth 2.0 Social Auth Buttons */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <button
             type="button"
             className="btn-outline-gray"
-            style={{ justifyContent: 'center', padding: '11px' }}
-            onClick={() => handleQuickDemo('tejas@skillswap.io', 'password123', 'Tejas Kushwaha')}
+            style={{ justifyContent: 'space-between', padding: '11px 14px' }}
+            onClick={() => handleOAuthLogin('google')}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
-              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.27v3.15C3.25 21.31 7.31 24 12 24z"/>
-              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.27C.46 8.2 0 10.04 0 12s.46 3.8 1.27 5.42l4.01-3.15z"/>
-              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.69 1.27 6.58l4.01 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-            </svg>
-            <span>Continue with Google</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.27v3.15C3.25 21.31 7.31 24 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.27C.46 8.2 0 10.04 0 12s.46 3.8 1.27 5.42l4.01-3.15z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.69 1.27 6.58l4.01 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+              </svg>
+              <span>Continue with Google</span>
+            </span>
+            <span
+              style={{
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                padding: '2px 7px',
+                background: providers.googleConfigured ? '#dcfce7' : '#f1f5f9',
+                color: providers.googleConfigured ? '#15803d' : '#64748b',
+              }}
+            >
+              {providers.googleConfigured ? 'OAuth Live' : 'Needs .env Keys'}
+            </span>
           </button>
 
           <button
             type="button"
             className="btn-outline-gray"
-            style={{ justifyContent: 'center', padding: '11px' }}
-            onClick={() => handleQuickDemo('rohan@skillswap.io', 'password123', 'Rohan Sharma')}
+            style={{ justifyContent: 'space-between', padding: '11px 14px' }}
+            onClick={() => handleOAuthLogin('github')}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="#0f172a">
-              <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
-            </svg>
-            <span>Continue with GitHub</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#0f172a">
+                <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+              </svg>
+              <span>Continue with GitHub</span>
+            </span>
+            <span
+              style={{
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                padding: '2px 7px',
+                background: providers.githubConfigured ? '#dcfce7' : '#f1f5f9',
+                color: providers.githubConfigured ? '#15803d' : '#64748b',
+              }}
+            >
+              {providers.githubConfigured ? 'OAuth Live' : 'Needs .env Keys'}
+            </span>
           </button>
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '0.9rem', color: '#64748b' }}>
+        <div style={{ textAlign: 'center', marginTop: '22px', fontSize: '0.9rem', color: '#64748b' }}>
           {isLogin ? "Don't have an account? " : 'Already have an account? '}
           <button
             type="button"
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setOtpStep(false);
+              setOtpCode('');
+              setFormError('');
+            }}
             style={{ color: '#0d9488', fontWeight: 700, textDecoration: 'underline' }}
           >
             {isLogin ? 'Sign Up' : 'Login'}
@@ -275,42 +496,49 @@ export const AuthPage = ({ onNavigate, initialMode = 'signup' }) => {
       </div>
 
       {/* Right Campus Image Column with Cursive Overlay */}
-      <div style={{
-        position: 'relative',
-        display: 'none',
-        minHeight: '100%',
-        backgroundColor: '#0f172a',
-      }}
-      className="campus-auth-column"
+      <div
+        style={{
+          position: 'relative',
+          display: 'none',
+          minHeight: '100%',
+          backgroundColor: '#0f172a',
+        }}
+        className="campus-auth-column"
       >
         <img
           src="/campus.jpg"
           alt="University Campus"
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
         />
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.2) 0%, rgba(15, 23, 42, 0.6) 100%)',
-        }} />
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.2) 0%, rgba(15, 23, 42, 0.6) 100%)',
+          }}
+        />
 
-        <div style={{
-          position: 'absolute',
-          top: '48px',
-          right: '54px',
-          maxWidth: '360px',
-          textAlign: 'right',
-        }}>
-          <span style={{
-            fontFamily: "'Caveat', cursive, sans-serif",
-            fontSize: '3.1rem',
-            color: '#ffffff',
-            fontWeight: 700,
-            textShadow: '0 3px 18px rgba(0,0,0,0.85), 0 1px 4px rgba(0,0,0,0.9)',
-            lineHeight: 1.15,
-            display: 'block',
-            letterSpacing: '0.01em',
-          }}>
+        <div
+          style={{
+            position: 'absolute',
+            top: '48px',
+            right: '54px',
+            maxWidth: '360px',
+            textAlign: 'right',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "'Caveat', cursive, sans-serif",
+              fontSize: '3.1rem',
+              color: '#ffffff',
+              fontWeight: 700,
+              textShadow: '0 3px 18px rgba(0,0,0,0.85), 0 1px 4px rgba(0,0,0,0.9)',
+              lineHeight: 1.15,
+              display: 'block',
+              letterSpacing: '0.01em',
+            }}
+          >
             Skills today,<br />opportunities tomorrow
           </span>
         </div>

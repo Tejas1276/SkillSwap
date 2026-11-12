@@ -117,4 +117,68 @@ describe('Auth Module API Tests', () => {
       expect(res.body.user.isAvailable).toBe(false);
     });
   });
+
+  describe('Email + Username OTP Signup & OAuth Routes', () => {
+    const EmailOtp = require('../src/models/EmailOtp');
+    const crypto = require('crypto');
+
+    it('should send OTP, reject wrong OTP, verify valid OTP, and allow username login', async () => {
+      const otpSend = await request(app)
+        .post('/api/auth/send-otp')
+        .send({
+          name: 'Neha Verma',
+          username: 'neha_dev',
+          email: 'neha@skillswap.io',
+          password: 'password123',
+          bio: 'CS Student',
+        });
+
+      expect(otpSend.status).toBe(200);
+      expect(otpSend.body.success).toBe(true);
+
+      const stored = await EmailOtp.findOne({ email: 'neha@skillswap.io' });
+      expect(stored).toBeTruthy();
+
+      // Inject known OTP hash to test verification Deterministically
+      const testOtp = '482913';
+      stored.otpHash = crypto.createHash('sha256').update(testOtp).digest('hex');
+      await stored.save();
+
+      const badVerify = await request(app)
+        .post('/api/auth/verify-otp')
+        .send({ email: 'neha@skillswap.io', otp: '000000' });
+      expect(badVerify.status).toBe(400);
+
+      const goodVerify = await request(app)
+        .post('/api/auth/verify-otp')
+        .send({ email: 'neha@skillswap.io', otp: testOtp });
+      expect(goodVerify.status).toBe(201);
+      expect(goodVerify.body.token).toBeTruthy();
+      expect(goodVerify.body.user.username).toBe('neha_dev');
+      expect(goodVerify.body.user.emailVerified).toBe(true);
+      expect(goodVerify.body.user.credits).toBe(100);
+
+      const usernameLogin = await request(app)
+        .post('/api/auth/login')
+        .send({ email: 'neha_dev', password: 'password123' });
+      expect(usernameLogin.status).toBe(200);
+      expect(usernameLogin.body.user.email).toBe('neha@skillswap.io');
+    });
+
+    it('should report provider config status and redirect safely when OAuth env keys are empty', async () => {
+      const statusRes = await request(app).get('/api/auth/providers');
+      expect(statusRes.status).toBe(200);
+      expect(statusRes.body.providers).toHaveProperty('googleConfigured');
+      expect(statusRes.body.providers).toHaveProperty('githubConfigured');
+      expect(statusRes.body.providers).toHaveProperty('smtpConfigured');
+
+      const gRes = await request(app).get('/api/auth/google');
+      expect(gRes.status).toBe(302);
+      expect(gRes.headers.location).toMatch(/auth_error=google_not_configured|accounts\.google\.com/);
+
+      const ghRes = await request(app).get('/api/auth/github');
+      expect(ghRes.status).toBe(302);
+      expect(ghRes.headers.location).toMatch(/auth_error=github_not_configured|github\.com\/login\/oauth/);
+    });
+  });
 });
