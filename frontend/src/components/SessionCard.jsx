@@ -12,7 +12,7 @@ import {
   UserCheck,
 } from 'lucide-react';
 
-export const SessionCard = ({ session, onRefresh, onOpenFeedback }) => {
+export const SessionCard = ({ session, onRefresh, onOpenFeedback, onEnterVideoRoom }) => {
   const { user, refreshUser } = useAuth();
   const [loadingAction, setLoadingAction] = useState(false);
 
@@ -159,7 +159,13 @@ export const SessionCard = ({ session, onRefresh, onOpenFeedback }) => {
             <span>Room ID: <code>{session.meetingRoomId}</code></span>
           </div>
           <button
-            onClick={() => alert(`Connecting to WebRTC Room: ${session.meetingRoomId}\n(Video Room integration is featured in Phase 3!)`)}
+            onClick={() =>
+              onEnterVideoRoom?.({
+                tutorName: otherParty?.name || 'Peer',
+                skill: session.skill,
+                roomId: session.meetingRoomId,
+              })
+            }
             className="btn-primary"
             style={{ padding: '6px 12px', fontSize: '0.8rem' }}
           >

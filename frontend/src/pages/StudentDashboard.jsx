@@ -16,7 +16,7 @@ import {
   Video,
 } from 'lucide-react';
 
-export const StudentDashboard = ({ onNavigate, onSelectTutor, onBookTutor }) => {
+export const StudentDashboard = ({ onNavigate, onSelectTutor, onBookTutor, onEnterVideoRoom }) => {
   const { user } = useAuth();
   const [sidebarTab, setSidebarTab] = useState('dashboard');
 
@@ -181,7 +181,15 @@ export const StudentDashboard = ({ onNavigate, onSelectTutor, onBookTutor }) => 
               Chat Tutor
             </button>
             <button
-              onClick={() => onNavigate?.('video')}
+              onClick={() =>
+                onEnterVideoRoom
+                  ? onEnterVideoRoom({
+                      tutorName: 'Rohan Sharma',
+                      skill: 'Web Development',
+                      roomId: 'room-rohan-sharma-oct14',
+                    })
+                  : onNavigate?.('video')
+              }
               className="btn-teal"
               style={{ padding: '8px 18px', fontSize: '0.86rem', gap: '6px' }}
             >

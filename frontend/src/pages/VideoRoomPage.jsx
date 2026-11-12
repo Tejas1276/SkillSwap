@@ -7,25 +7,46 @@ import {
   ScreenShare,
   MessageSquare,
   Users,
-  MoreVertical,
   PhoneOff,
   Send,
-  Heart,
-  Paperclip,
-  CheckCircle2,
+  Copy,
+  Check,
+  Wifi,
+  FileText,
+  AlertCircle,
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useWebRTC } from '../hooks/useWebRTC';
+import { VideoTile } from '../components/VideoTile';
 
 export const VideoRoomPage = ({ sessionInfo, onEndSession, onNavigate }) => {
-  const [micOn, setMicOn] = useState(true);
-  const [cameraOn, setCameraOn] = useState(true);
+  const { user } = useAuth();
+  const roomId = sessionInfo?.roomId || 'room-skillswap-demo';
+  const tutorName = sessionInfo?.tutorName || 'Rohan Sharma';
+  const skillName = sessionInfo?.skill || 'Web Development';
+
+  const {
+    localStream,
+    screenStream,
+    remotePeers,
+    micOn,
+    cameraOn,
+    screenSharing,
+    connectionStatus,
+    mediaError,
+    messages,
+    sharedNotes,
+    toggleMic,
+    toggleCamera,
+    toggleScreenShare,
+    sendChatMessage,
+    updateSharedNotes,
+  } = useWebRTC({ roomId, user });
+
   const [activeTab, setActiveTab] = useState('Chat');
-  const [messages, setMessages] = useState([
-    { id: 1, sender: 'Rohan', text: "Here's the GitHub repo: https://github.com/rohansharma/react-mastery", time: '3:05 PM' },
-    { id: 2, sender: 'Rohan', text: "Let's try this example now:", time: '3:08 PM' },
-    { id: 3, sender: 'You', text: "Sure! Pulling the repository now.", time: '3:09 PM' },
-  ]);
   const [inputMsg, setInputMsg] = useState('');
-  const [seconds, setSeconds] = useState(2059); // 00:34:19
+  const [seconds, setSeconds] = useState(0);
+  const [copiedRoom, setCopiedRoom] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -38,81 +59,127 @@ export const VideoRoomPage = ({ sessionInfo, onEndSession, onNavigate }) => {
     const hrs = Math.floor(totalSec / 3600);
     const mins = Math.floor((totalSec % 3600) / 60);
     const secs = totalSec % 60;
-    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${hrs.toString().padStart(2, '0')}:${mins
+      .toString()
+      .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   const handleSend = (e) => {
     e.preventDefault();
     if (!inputMsg.trim()) return;
-    setMessages((prev) => [
-      ...prev,
-      { id: Date.now(), sender: 'You', text: inputMsg.trim(), time: 'Just now' },
-    ]);
+    sendChatMessage(inputMsg);
     setInputMsg('');
   };
 
-  const tutorName = sessionInfo?.tutorName || 'Rohan Sharma';
+  const handleCopyRoomId = () => {
+    navigator.clipboard?.writeText(roomId);
+    setCopiedRoom(true);
+    setTimeout(() => setCopiedRoom(false), 2000);
+  };
+
+  const localDisplayStream = screenSharing && screenStream ? screenStream : localStream;
 
   return (
-    <div style={{
-      backgroundColor: '#0b0f19',
-      color: '#ffffff',
-      height: 'calc(100vh - 65px)',
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden',
-    }}>
-      {/* 1. Top Bar */}
-      <div style={{
-        padding: '12px 24px',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+    <div
+      style={{
+        backgroundColor: '#0b0f19',
+        color: '#ffffff',
+        height: '100vh',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        background: '#070a12',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }}
+    >
+      {/* 1. Top Bar */}
+      <div
+        style={{
+          padding: '12px 24px',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          background: '#070a12',
+          flexWrap: 'wrap',
+          gap: '12px',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <img src="/logo.png" alt="Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
             <strong style={{ fontSize: '1.1rem', letterSpacing: '-0.01em' }}>Skill Swap</strong>
           </div>
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.06)',
-            padding: '4px 12px',
-            borderRadius: '9999px',
-            fontSize: '0.84rem',
-            fontFamily: 'monospace',
-            color: '#38bdf8',
-          }}>
+
+          <div
+            style={{
+              background: 'rgba(13, 148, 136, 0.16)',
+              border: '1px solid rgba(13, 148, 136, 0.45)',
+              padding: '4px 12px',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              color: '#5eead4',
+            }}
+          >
+            {skillName}
+          </div>
+
+          <div
+            style={{
+              background: 'rgba(255, 255, 255, 0.06)',
+              padding: '4px 12px',
+              fontSize: '0.84rem',
+              fontFamily: 'monospace',
+              color: '#38bdf8',
+            }}
+          >
             ⏱ {formatTimer(seconds)}
+          </div>
+
+          {/* Signaling / P2P Connection Status */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '0.8rem',
+              color: connectionStatus === 'connected' ? '#10b981' : '#f59e0b',
+              fontWeight: 600,
+            }}
+          >
+            <Wifi size={14} />
+            <span>
+              {connectionStatus === 'connected'
+                ? `Live P2P (${remotePeers.length + 1} in room)`
+                : 'Signaling Connected — Waiting for Peer'}
+            </span>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Room ID Copy Pill */}
           <button
-            onClick={() => setActiveTab('Chat')}
+            onClick={handleCopyRoomId}
             style={{
-              background: 'rgba(255, 255, 255, 0.08)',
-              color: '#ffffff',
+              background: 'rgba(255, 255, 255, 0.06)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              color: '#cbd5e1',
               padding: '6px 12px',
-              borderRadius: '6px',
-              fontSize: '0.82rem',
+              fontSize: '0.78rem',
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
             }}
+            title="Copy Room ID to join from another tab/device"
           >
-            <MessageSquare size={14} />
-            <span>Chat</span>
+            {copiedRoom ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
+            <span>Room: {roomId}</span>
           </button>
 
           <button
-            onClick={() => onEndSession ? onEndSession() : onNavigate?.('sessions')}
+            onClick={() => (onEndSession ? onEndSession() : onNavigate?.('dashboard'))}
             style={{
               background: '#ef4444',
               color: '#ffffff',
-              padding: '6px 16px',
-              borderRadius: '6px',
+              padding: '7px 16px',
               fontSize: '0.84rem',
               fontWeight: 700,
               display: 'flex',
@@ -126,134 +193,101 @@ export const VideoRoomPage = ({ sessionInfo, onEndSession, onNavigate }) => {
         </div>
       </div>
 
-      {/* 2. Main Stage: Video Grid + Chat Panel */}
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {/* Left: Video Area */}
-        <div style={{
-          flex: 1,
-          padding: '20px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-        }}>
-          {/* Two Peer Video Tiles */}
-          <div style={{
-            flex: 1,
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
-            gap: '16px',
+      {/* Hardware / Permission Notice Banner (only if camera/mic blocked or missing) */}
+      {mediaError && (
+        <div
+          style={{
+            background: '#451a03',
+            borderBottom: '1px solid #d97706',
+            color: '#fde68a',
+            padding: '6px 24px',
+            fontSize: '0.8rem',
+            display: 'flex',
             alignItems: 'center',
-          }}>
-            {/* Tile 1: Rohan Sharma (Tutor) */}
-            <div style={{
-              height: '100%',
-              minHeight: '380px',
-              background: '#151c2e',
-              borderRadius: '16px',
-              overflow: 'hidden',
-              position: 'relative',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <img
-                src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=600"
-                alt="Rohan Sharma"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
+            gap: '8px',
+          }}
+        >
+          <AlertCircle size={15} />
+          <span>{mediaError} (Chat, Notes & remote viewing remain active)</span>
+        </div>
+      )}
 
-              {/* Top bookmark icon */}
-              <button
-                style={{ position: 'absolute', top: '16px', right: '16px', color: '#fff', background: 'rgba(0,0,0,0.4)', borderRadius: '50%', padding: '6px' }}
-              >
-                <Heart size={16} />
-              </button>
-
-              {/* Bottom label */}
-              <div style={{
-                position: 'absolute',
-                bottom: '16px',
-                left: '16px',
-                background: 'rgba(0, 0, 0, 0.65)',
-                backdropFilter: 'blur(6px)',
-                padding: '6px 12px',
-                borderRadius: '8px',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }} />
-                <span>{tutorName}</span>
-              </div>
-            </div>
-
-            {/* Tile 2: You (Learner) */}
-            <div style={{
-              height: '100%',
-              minHeight: '380px',
-              background: '#151c2e',
-              borderRadius: '16px',
-              overflow: 'hidden',
-              position: 'relative',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              {cameraOn ? (
-                <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600"
-                  alt="You"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      {/* 2. Main Stage: Video Grid + Sidebar */}
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        {/* Left: WebRTC Video Area */}
+        <div
+          style={{
+            flex: 1,
+            padding: '20px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            overflowY: 'auto',
+          }}
+        >
+          {/* Peer Video Grid */}
+          <div
+            style={{
+              flex: 1,
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+              gap: '16px',
+              alignItems: 'stretch',
+            }}
+          >
+            {/* Remote Peer Tile(s) */}
+            {remotePeers.length > 0 ? (
+              remotePeers.map((peer) => (
+                <VideoTile
+                  key={peer.socketId}
+                  stream={peer.stream}
+                  label={peer.userName}
+                  isLocal={false}
+                  cameraOn={peer.cameraOn}
+                  micOn={peer.micOn}
+                  screenSharing={peer.screenSharing}
                 />
-              ) : (
-                <div style={{ textAlign: 'center', color: '#64748b' }}>
-                  <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px', fontSize: '1.8rem', fontWeight: 700, color: '#fff' }}>
-                    Y
-                  </div>
-                  <span>Camera Off</span>
-                </div>
-              )}
+              ))
+            ) : (
+              <VideoTile
+                stream={null}
+                label={tutorName}
+                isLocal={false}
+                cameraOn={false}
+                micOn={true}
+                statusText={`Open a second tab at Room "${roomId}" to test live P2P WebRTC video`}
+              />
+            )}
 
-              {/* Bottom label */}
-              <div style={{
-                position: 'absolute',
-                bottom: '16px',
-                left: '16px',
-                background: 'rgba(0, 0, 0, 0.65)',
-                backdropFilter: 'blur(6px)',
-                padding: '6px 12px',
-                borderRadius: '8px',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }} />
-                <span>You</span>
-              </div>
-            </div>
+            {/* Local Self Tile */}
+            <VideoTile
+              stream={localDisplayStream}
+              label={`${user?.name || 'You'} (You)`}
+              isLocal={true}
+              cameraOn={cameraOn}
+              micOn={micOn}
+              screenSharing={screenSharing}
+              statusText={mediaError || 'Camera Off'}
+            />
           </div>
 
           {/* Floating Call Controls Bar */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: '12px',
-            marginTop: '16px',
-          }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '12px',
+              marginTop: '16px',
+            }}
+          >
             <button
-              onClick={() => setMicOn(!micOn)}
+              onClick={toggleMic}
               style={{
-                width: '46px',
-                height: '46px',
-                borderRadius: '50%',
+                width: '48px',
+                height: '48px',
                 background: micOn ? 'rgba(255,255,255,0.1)' : '#ef4444',
+                border: '1px solid rgba(255,255,255,0.12)',
                 color: '#fff',
                 display: 'flex',
                 alignItems: 'center',
@@ -265,12 +299,12 @@ export const VideoRoomPage = ({ sessionInfo, onEndSession, onNavigate }) => {
             </button>
 
             <button
-              onClick={() => setCameraOn(!cameraOn)}
+              onClick={toggleCamera}
               style={{
-                width: '46px',
-                height: '46px',
-                borderRadius: '50%',
+                width: '48px',
+                height: '48px',
                 background: cameraOn ? 'rgba(255,255,255,0.1)' : '#ef4444',
+                border: '1px solid rgba(255,255,255,0.12)',
                 color: '#fff',
                 display: 'flex',
                 alignItems: 'center',
@@ -282,17 +316,20 @@ export const VideoRoomPage = ({ sessionInfo, onEndSession, onNavigate }) => {
             </button>
 
             <button
+              onClick={toggleScreenShare}
               style={{
-                width: '46px',
-                height: '46px',
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.1)',
+                width: '48px',
+                height: '48px',
+                background: screenSharing ? '#0d9488' : 'rgba(255,255,255,0.1)',
+                border: screenSharing
+                  ? '1px solid #14b8a6'
+                  : '1px solid rgba(255,255,255,0.12)',
                 color: '#fff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
-              title="Share Screen"
+              title={screenSharing ? 'Stop Sharing Screen' : 'Share Screen'}
             >
               <ScreenShare size={20} />
             </button>
@@ -300,69 +337,76 @@ export const VideoRoomPage = ({ sessionInfo, onEndSession, onNavigate }) => {
             <button
               onClick={() => setActiveTab('Chat')}
               style={{
-                width: '46px',
-                height: '46px',
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.1)',
+                width: '48px',
+                height: '48px',
+                background: activeTab === 'Chat' ? '#0d9488' : 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.12)',
                 color: '#fff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
-              title="Chat"
+              title="In-Session Chat"
             >
               <MessageSquare size={20} />
             </button>
 
             <button
+              onClick={() => setActiveTab('Notes')}
               style={{
-                width: '46px',
-                height: '46px',
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.1)',
+                width: '48px',
+                height: '48px',
+                background: activeTab === 'Notes' ? '#0d9488' : 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.12)',
                 color: '#fff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
-              title="Participants"
+              title="Collaborative Notes"
             >
-              <Users size={20} />
+              <FileText size={20} />
             </button>
 
-            <button
+            <div
               style={{
-                width: '46px',
-                height: '46px',
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.1)',
-                color: '#fff',
+                height: '48px',
+                padding: '0 14px',
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.1)',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
+                gap: '6px',
+                fontSize: '0.84rem',
+                color: '#cbd5e1',
               }}
-              title="More Options"
+              title="Active Participants"
             >
-              <MoreVertical size={20} />
-            </button>
+              <Users size={18} />
+              <span>{remotePeers.length + 1}</span>
+            </div>
           </div>
         </div>
 
-        {/* Right Sidebar: Chat, Resources, Notes */}
-        <div style={{
-          width: '320px',
-          background: '#0d1322',
-          borderLeft: '1px solid rgba(255, 255, 255, 0.08)',
-          display: 'flex',
-          flexDirection: 'column',
-        }}>
-          {/* Tab Header */}
-          <div style={{
+        {/* Right Sidebar: Live Chat, Resources, Notes */}
+        <div
+          style={{
+            width: '340px',
+            background: '#0d1322',
+            borderLeft: '1px solid rgba(255, 255, 255, 0.08)',
             display: 'flex',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-            background: '#090e1a',
-          }}>
-            {['Chat', 'Resources', 'Notes'].map((t) => (
+            flexDirection: 'column',
+          }}
+        >
+          {/* Tab Header */}
+          <div
+            style={{
+              display: 'flex',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+              background: '#090e1a',
+            }}
+          >
+            {['Chat', 'Notes', 'Resources'].map((t) => (
               <button
                 key={t}
                 onClick={() => setActiveTab(t)}
@@ -371,8 +415,8 @@ export const VideoRoomPage = ({ sessionInfo, onEndSession, onNavigate }) => {
                   padding: '12px 0',
                   fontSize: '0.85rem',
                   fontWeight: activeTab === t ? 700 : 500,
-                  color: activeTab === t ? '#38bdf8' : '#64748b',
-                  borderBottom: activeTab === t ? '2px solid #38bdf8' : 'none',
+                  color: activeTab === t ? '#5eead4' : '#64748b',
+                  borderBottom: activeTab === t ? '2px solid #0d9488' : 'none',
                 }}
               >
                 {t}
@@ -380,80 +424,141 @@ export const VideoRoomPage = ({ sessionInfo, onEndSession, onNavigate }) => {
             ))}
           </div>
 
-          {/* Messages Area */}
-          <div style={{
-            flex: 1,
-            padding: '16px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '12px',
-            overflowY: 'auto',
-          }}>
-            {messages.map((m) => (
+          {/* Tab Content */}
+          {activeTab === 'Chat' && (
+            <>
               <div
-                key={m.id}
                 style={{
+                  flex: 1,
+                  padding: '16px',
                   display: 'flex',
                   flexDirection: 'column',
-                  alignItems: m.sender === 'You' ? 'flex-end' : 'flex-start',
+                  gap: '12px',
+                  overflowY: 'auto',
                 }}
               >
-                <span style={{ fontSize: '0.72rem', color: '#64748b', marginBottom: '2px' }}>
-                  {m.sender} • {m.time}
-                </span>
-                <div style={{
-                  background: m.sender === 'You' ? '#0d9488' : '#1e293b',
-                  color: '#ffffff',
-                  padding: '8px 12px',
-                  borderRadius: '10px',
-                  fontSize: '0.86rem',
-                  maxWidth: '85%',
-                  lineHeight: 1.4,
-                  wordBreak: 'break-word',
-                }}>
-                  {m.text}
-                </div>
+                {messages.map((m) => (
+                  <div
+                    key={m.id}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: m.isSystem
+                        ? 'center'
+                        : m.sender === 'You'
+                        ? 'flex-end'
+                        : 'flex-start',
+                    }}
+                  >
+                    {!m.isSystem && (
+                      <span style={{ fontSize: '0.72rem', color: '#64748b', marginBottom: '2px' }}>
+                        {m.sender} • {m.time}
+                      </span>
+                    )}
+                    <div
+                      style={{
+                        background: m.isSystem
+                          ? 'rgba(255,255,255,0.05)'
+                          : m.sender === 'You'
+                          ? '#0d9488'
+                          : '#1e293b',
+                        color: m.isSystem ? '#94a3b8' : '#ffffff',
+                        padding: m.isSystem ? '6px 10px' : '8px 12px',
+                        fontSize: m.isSystem ? '0.76rem' : '0.86rem',
+                        maxWidth: m.isSystem ? '100%' : '85%',
+                        textAlign: m.isSystem ? 'center' : 'left',
+                        lineHeight: 1.4,
+                        wordBreak: 'break-word',
+                      }}
+                    >
+                      {m.text}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          {/* Chat Input */}
-          <form onSubmit={handleSend} style={{
-            padding: '12px',
-            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-            display: 'flex',
-            gap: '8px',
-          }}>
-            <input
-              type="text"
-              placeholder="Type a message..."
-              value={inputMsg}
-              onChange={(e) => setInputMsg(e.target.value)}
-              style={{
-                flex: 1,
-                background: '#151c2e',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: '#fff',
-                fontSize: '0.86rem',
-                padding: '8px 12px',
-              }}
-            />
-            <button
-              type="submit"
-              style={{
-                background: '#0d9488',
-                color: '#fff',
-                width: '36px',
-                height: '36px',
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Send size={16} />
-            </button>
-          </form>
+              {/* Chat Input */}
+              <form
+                onSubmit={handleSend}
+                style={{
+                  padding: '12px',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+                  display: 'flex',
+                  gap: '8px',
+                }}
+              >
+                <input
+                  type="text"
+                  placeholder="Type a message..."
+                  value={inputMsg}
+                  onChange={(e) => setInputMsg(e.target.value)}
+                  style={{
+                    flex: 1,
+                    background: '#151c2e',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    color: '#fff',
+                    fontSize: '0.86rem',
+                    padding: '8px 12px',
+                  }}
+                />
+                <button
+                  type="submit"
+                  style={{
+                    background: '#0d9488',
+                    color: '#fff',
+                    width: '38px',
+                    height: '38px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Send size={16} />
+                </button>
+              </form>
+            </>
+          )}
+
+          {activeTab === 'Notes' && (
+            <div style={{ flex: 1, padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <span style={{ fontSize: '0.78rem', color: '#5eead4', fontWeight: 700 }}>
+                LIVE SHARED NOTES (Synced via Socket.IO)
+              </span>
+              <textarea
+                value={sharedNotes}
+                onChange={(e) => updateSharedNotes(e.target.value)}
+                placeholder="Write session takeaways or code snippets here..."
+                style={{
+                  flex: 1,
+                  width: '100%',
+                  background: '#151c2e',
+                  color: '#e2e8f0',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  padding: '12px',
+                  fontSize: '0.86rem',
+                  fontFamily: 'monospace',
+                  resize: 'none',
+                  lineHeight: 1.5,
+                }}
+              />
+            </div>
+          )}
+
+          {activeTab === 'Resources' && (
+            <div style={{ flex: 1, padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ background: '#151c2e', padding: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ fontSize: '0.76rem', color: '#94a3b8', marginBottom: '4px' }}>WEBRTC ICE TRANSPORT</div>
+                <strong style={{ fontSize: '0.86rem', color: '#5eead4' }}>Google Public STUN + SRTP/DTLS</strong>
+              </div>
+              <div style={{ background: '#151c2e', padding: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ fontSize: '0.76rem', color: '#94a3b8', marginBottom: '4px' }}>ACTIVE ROOM ID</div>
+                <code style={{ fontSize: '0.85rem', color: '#fff' }}>{roomId}</code>
+              </div>
+              <div style={{ background: '#151c2e', padding: '12px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.82rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+                To test peer-to-peer streaming locally, open <strong>http://localhost:3000</strong> in another browser tab and enter the Video Room with matching Room ID <code>{roomId}</code>.
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

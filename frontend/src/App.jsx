@@ -97,6 +97,7 @@ function AppContent() {
             onNavigate={handleNavigate}
             onSelectTutor={handleSelectTutor}
             onBookTutor={handleBookTutor}
+            onEnterVideoRoom={handleEnterVideoRoom}
           />
         )}
 
