@@ -4,7 +4,105 @@ import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { SkillSearchAutocomplete } from '../components/SkillSearchAutocomplete';
 
-export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSearch = '' }) => {
+export const ALL_TUTORS = [
+  {
+    id: 'rohan-sharma',
+    skill: 'Web Development',
+    name: 'Rohan Sharma',
+    college: 'Delhi Tech',
+    avatar: '/avatars/rohan.svg',
+    rating: 4.8,
+    reviewsCount: 25,
+    tags: ['React', 'Node.js'],
+    category: 'Tech',
+  },
+  {
+    id: 'priya-singh',
+    skill: 'UI/UX Design',
+    name: 'Priya Singh',
+    college: 'NID / IIT',
+    avatar: '/avatars/priya.svg',
+    rating: 4.7,
+    reviewsCount: 18,
+    tags: ['Figma', 'Design'],
+    category: 'Design',
+  },
+  {
+    id: 'aman-verma',
+    skill: 'Data Science',
+    name: 'Aman Verma',
+    college: 'BITS Pilani',
+    avatar: '/avatars/aman.svg',
+    rating: 4.9,
+    reviewsCount: 31,
+    tags: ['Python', 'ML'],
+    category: 'Tech',
+  },
+  {
+    id: 'kritika-jain',
+    skill: 'Video Editing',
+    name: 'Kritika Jain',
+    college: 'Delhi Univ',
+    avatar: '/avatars/kritika.svg',
+    rating: 4.9,
+    reviewsCount: 15,
+    tags: ['Premiere Pro', 'Editing'],
+    category: 'Design',
+  },
+  {
+    id: 'aditya-rao',
+    skill: 'Guitar',
+    name: 'Aditya Rao',
+    college: 'IIT Bombay',
+    avatar: '/avatars/aditya.svg',
+    rating: 4.8,
+    reviewsCount: 12,
+    tags: ['Music', 'Beginner Friendly'],
+    category: 'Music',
+  },
+  {
+    id: 'arjun-mehta',
+    skill: 'Public Speaking',
+    name: 'Arjun Mehta',
+    college: 'SRCC',
+    avatar: '/avatars/arjun.svg',
+    rating: 4.9,
+    reviewsCount: 12,
+    tags: ['Communication', 'Confidence'],
+    category: 'Communication',
+  },
+  {
+    id: 'nidhi-kapoor',
+    skill: 'English Speaking',
+    name: 'Nidhi Kapoor',
+    college: 'Ashoka Univ',
+    avatar: '/avatars/nidhi.svg',
+    rating: 4.7,
+    reviewsCount: 19,
+    tags: ['English', 'Conversation'],
+    category: 'Languages',
+  },
+  {
+    id: 'rahul-yadav',
+    skill: 'DSA (C++)',
+    name: 'Rahul Yadav',
+    college: 'DTU CSE',
+    avatar: '/avatars/rahul.svg',
+    rating: 4.8,
+    reviewsCount: 26,
+    tags: ['C++', 'Problem Solving'],
+    category: 'Academics',
+  },
+];
+
+export const ExplorePage = ({
+  onSelectTutor,
+  onBookTutor,
+  onNavigate,
+  initialSearch = '',
+  bookmarkedTutorIds = null,
+  onToggleBookmark = null,
+}) => {
   const { user } = useAuth();
   const [search, setSearch] = useState(initialSearch);
   const [activeCategory, setActiveCategory] = useState('All');
@@ -31,96 +129,7 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
     'Others',
   ];
 
-  const allTutors = [
-    {
-      id: 'rohan-sharma',
-      skill: 'Web Development',
-      name: 'Rohan Sharma',
-      college: 'Delhi Tech',
-      avatar: '/avatars/rohan.svg',
-      rating: 4.8,
-      reviewsCount: 25,
-      tags: ['React', 'Node.js'],
-      category: 'Tech',
-    },
-    {
-      id: 'priya-singh',
-      skill: 'UI/UX Design',
-      name: 'Priya Singh',
-      college: 'NID / IIT',
-      avatar: '/avatars/priya.svg',
-      rating: 4.7,
-      reviewsCount: 18,
-      tags: ['Figma', 'Design'],
-      category: 'Design',
-    },
-    {
-      id: 'aman-verma',
-      skill: 'Data Science',
-      name: 'Aman Verma',
-      college: 'BITS Pilani',
-      avatar: '/avatars/aman.svg',
-      rating: 4.9,
-      reviewsCount: 31,
-      tags: ['Python', 'ML'],
-      category: 'Tech',
-    },
-    {
-      id: 'kritika-jain',
-      skill: 'Video Editing',
-      name: 'Kritika Jain',
-      college: 'Delhi Univ',
-      avatar: '/avatars/kritika.svg',
-      rating: 4.9,
-      reviewsCount: 15,
-      tags: ['Premiere Pro', 'Editing'],
-      category: 'Design',
-    },
-    {
-      id: 'aditya-rao',
-      skill: 'Guitar',
-      name: 'Aditya Rao',
-      college: 'IIT Bombay',
-      avatar: '/avatars/aditya.svg',
-      rating: 4.8,
-      reviewsCount: 12,
-      tags: ['Music', 'Beginner Friendly'],
-      category: 'Music',
-    },
-    {
-      id: 'arjun-mehta',
-      skill: 'Public Speaking',
-      name: 'Arjun Mehta',
-      college: 'SRCC',
-      avatar: '/avatars/arjun.svg',
-      rating: 4.9,
-      reviewsCount: 12,
-      tags: ['Communication', 'Confidence'],
-      category: 'Communication',
-    },
-    {
-      id: 'nidhi-kapoor',
-      skill: 'English Speaking',
-      name: 'Nidhi Kapoor',
-      college: 'Ashoka Univ',
-      avatar: '/avatars/nidhi.svg',
-      rating: 4.7,
-      reviewsCount: 19,
-      tags: ['English', 'Conversation'],
-      category: 'Languages',
-    },
-    {
-      id: 'rahul-yadav',
-      skill: 'DSA (C++)',
-      name: 'Rahul Yadav',
-      college: 'DTU CSE',
-      avatar: '/avatars/rahul.svg',
-      rating: 4.8,
-      reviewsCount: 26,
-      tags: ['C++', 'Problem Solving'],
-      category: 'Academics',
-    },
-  ];
+  const allTutors = ALL_TUTORS;
 
   const filteredTutors = allTutors.filter((t) => {
     const matchesSearch =
@@ -136,8 +145,15 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
     return matchesSearch && matchesCategory && matchesRating;
   });
 
+  const isTutorBookmarked = (id) =>
+    Array.isArray(bookmarkedTutorIds) ? bookmarkedTutorIds.includes(id) : !!favorites[id];
+
   const toggleFavorite = (id) => {
-    setFavorites((prev) => ({ ...prev, [id]: !prev[id] }));
+    if (onToggleBookmark) {
+      onToggleBookmark(id);
+    } else {
+      setFavorites((prev) => ({ ...prev, [id]: !prev[id] }));
+    }
   };
 
   const handleRunAIMatch = async () => {
@@ -335,10 +351,10 @@ export const ExplorePage = ({ onSelectTutor, onBookTutor, onNavigate, initialSea
                   )}
                   <button
                     onClick={() => toggleFavorite(tutor.id)}
-                    style={{ color: favorites[tutor.id] ? '#ef4444' : '#cbd5e1' }}
+                    style={{ color: isTutorBookmarked(tutor.id) ? '#ef4444' : '#cbd5e1' }}
                     title="Bookmark"
                   >
-                    <Heart size={20} fill={favorites[tutor.id] ? '#ef4444' : 'transparent'} />
+                    <Heart size={20} fill={isTutorBookmarked(tutor.id) ? '#ef4444' : 'transparent'} />
                   </button>
                 </div>
               </div>

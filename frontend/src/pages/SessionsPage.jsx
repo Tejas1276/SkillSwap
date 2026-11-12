@@ -4,7 +4,7 @@ import { SessionCard } from '../components/SessionCard';
 import { FeedbackModal } from '../components/FeedbackModal';
 import { Calendar, Filter, CheckCircle } from 'lucide-react';
 
-export const SessionsPage = () => {
+export const SessionsPage = ({ onEnterVideoRoom }) => {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
@@ -119,6 +119,7 @@ export const SessionsPage = () => {
               session={session}
               onRefresh={fetchSessions}
               onOpenFeedback={(sess) => setSelectedSessionForFeedback(sess)}
+              onEnterVideoRoom={onEnterVideoRoom}
             />
           ))}
         </div>

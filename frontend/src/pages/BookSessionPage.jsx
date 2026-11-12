@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Clock, Video, Coins, CheckCircle2, Calendar as CalendarIcon } from 'lucide-react';
+import { ArrowLeft, Clock, Video, Coins, CheckCircle2 } from 'lucide-react';
 
-export const BookSessionPage = ({ tutor, onNavigate, onEnterVideoRoom }) => {
+export const BookSessionPage = ({ tutor, onNavigate, onEnterVideoRoom, onBookingCreated }) => {
   const [sessionType, setSessionType] = useState('1on1');
-  const [selectedDate, setSelectedDate] = useState(14); // Oct 14
+  const [selectedDate, setSelectedDate] = useState(14); // Nov 14
   const [selectedSlot, setSelectedSlot] = useState('3:00 PM');
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
 
@@ -22,10 +22,20 @@ export const BookSessionPage = ({ tutor, onNavigate, onEnterVideoRoom }) => {
     '7:00 PM',
   ];
 
-  const daysInOctober = Array.from({ length: 31 }, (_, i) => i + 1);
+  const daysInNovember = Array.from({ length: 30 }, (_, i) => i + 1);
+  const slugName = (selectedTutor.name || 'rohan-sharma').toLowerCase().replace(/\s+/g, '-');
+  const roomId = `room-${slugName}-nov${selectedDate}`;
 
   const handleConfirm = () => {
     setBookingConfirmed(true);
+    onBookingCreated?.({
+      tutorName: selectedTutor.name,
+      skill: selectedTutor.skill || 'Web Development',
+      sessionType: sessionType === '1on1' ? '1-on-1' : 'Group',
+      dateLabel: `Nov ${selectedDate}`,
+      slot: selectedSlot,
+      roomId,
+    });
   };
 
   return (
@@ -49,29 +59,36 @@ export const BookSessionPage = ({ tutor, onNavigate, onEnterVideoRoom }) => {
 
       {bookingConfirmed ? (
         <div className="clean-card" style={{ padding: '48px', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
-          <div style={{ display: 'inline-flex', padding: '16px', borderRadius: '50%', background: '#f0fdfa', marginBottom: '18px' }}>
+          <div style={{ display: 'inline-flex', padding: '16px', background: '#f0fdfa', marginBottom: '18px' }}>
             <CheckCircle2 size={48} color="#0d9488" />
           </div>
           <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0f172a', marginBottom: '8px' }}>
             Session Booked Successfully!
           </h2>
           <p style={{ color: '#64748b', fontSize: '0.98rem', marginBottom: '24px' }}>
-            Your 1-on-1 session with <strong>{selectedTutor.name}</strong> for <strong>{selectedTutor.skill}</strong> is confirmed for October 14, 2026 at {selectedSlot}.
+            Your <strong>{sessionType === '1on1' ? '1-on-1' : 'Group'}</strong> session with{' '}
+            <strong>{selectedTutor.name}</strong> for <strong>{selectedTutor.skill || 'Web Development'}</strong> is
+            confirmed for <strong>November {selectedDate}, 2026</strong> at <strong>{selectedSlot}</strong>.
           </p>
 
-          <div style={{ display: 'flex', gap: '14px', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button
-              onClick={() => onNavigate?.('dashboard')}
+              onClick={() => {
+                setBookingConfirmed(false);
+                onNavigate?.('dashboard');
+              }}
               className="btn-outline-gray"
             >
               Go to Dashboard
             </button>
             <button
-              onClick={() => onEnterVideoRoom?.({
-                tutorName: selectedTutor.name,
-                skill: selectedTutor.skill,
-                roomId: 'room-rohan-sharma-oct14',
-              })}
+              onClick={() =>
+                onEnterVideoRoom?.({
+                  tutorName: selectedTutor.name,
+                  skill: selectedTutor.skill || 'Web Development',
+                  roomId,
+                })
+              }
               className="btn-teal"
               style={{ gap: '8px' }}
             >
@@ -81,17 +98,19 @@ export const BookSessionPage = ({ tutor, onNavigate, onEnterVideoRoom }) => {
           </div>
         </div>
       ) : (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
-          gap: '32px',
-          alignItems: 'flex-start',
-        }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+            gap: '32px',
+            alignItems: 'flex-start',
+          }}
+        >
           {/* Left Column: Form Details */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
               <h1 style={{ fontSize: '1.75rem', fontWeight: 900, color: '#0f172a' }}>
-                Book a Session
+                Book a Session with {selectedTutor.name}
               </h1>
               <div style={{ fontSize: '0.86rem', color: '#64748b', marginTop: '4px' }}>
                 Skill: <strong style={{ color: '#0d9488' }}>{selectedTutor.skill || 'Web Development'}</strong>
@@ -112,19 +131,19 @@ export const BookSessionPage = ({ tutor, onNavigate, onEnterVideoRoom }) => {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '14px 18px',
-                    borderRadius: '10px',
                     border: sessionType === '1on1' ? '2px solid #0d9488' : '1px solid #e2e8f0',
                     background: sessionType === '1on1' ? '#f0fdfa' : '#ffffff',
                     cursor: 'pointer',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{
-                      width: '18px',
-                      height: '18px',
-                      borderRadius: '50%',
-                      border: sessionType === '1on1' ? '5px solid #0d9488' : '2px solid #cbd5e1',
-                    }} />
+                    <div
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        border: sessionType === '1on1' ? '5px solid #0d9488' : '2px solid #cbd5e1',
+                      }}
+                    />
                     <span style={{ fontWeight: 700, fontSize: '0.92rem', color: '#0f172a' }}>
                       1 on 1 Session
                     </span>
@@ -140,19 +159,19 @@ export const BookSessionPage = ({ tutor, onNavigate, onEnterVideoRoom }) => {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '14px 18px',
-                    borderRadius: '10px',
                     border: sessionType === 'group' ? '2px solid #0d9488' : '1px solid #e2e8f0',
                     background: sessionType === 'group' ? '#f0fdfa' : '#ffffff',
                     cursor: 'pointer',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{
-                      width: '18px',
-                      height: '18px',
-                      borderRadius: '50%',
-                      border: sessionType === 'group' ? '5px solid #0d9488' : '2px solid #cbd5e1',
-                    }} />
+                    <div
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        border: sessionType === 'group' ? '5px solid #0d9488' : '2px solid #cbd5e1',
+                      }}
+                    />
                     <span style={{ fontWeight: 700, fontSize: '0.92rem', color: '#0f172a' }}>
                       Group Session
                     </span>
@@ -162,14 +181,14 @@ export const BookSessionPage = ({ tutor, onNavigate, onEnterVideoRoom }) => {
               </div>
             </div>
 
-            {/* Select Date Calendar */}
+            {/* Select Date Calendar (November 2026 starts on Sunday -> 0 leading blanks) */}
             <div className="clean-card" style={{ padding: '20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                 <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0f172a' }}>
-                  October 2026
+                  November 2026
                 </span>
                 <span style={{ fontSize: '0.78rem', color: '#0d9488', fontWeight: 600 }}>
-                  Today: Oct 09
+                  Today: Nov 12
                 </span>
               </div>
 
@@ -182,29 +201,24 @@ export const BookSessionPage = ({ tutor, onNavigate, onEnterVideoRoom }) => {
                 ))}
               </div>
 
-              {/* Calendar Grid (October 2026 starts on Thursday, so 4 blanks) */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', textAlign: 'center' }}>
-                {[null, null, null, null].map((_, i) => (
-                  <div key={`empty-${i}`} />
-                ))}
-                {daysInOctober.map((day) => {
+                {daysInNovember.map((day) => {
                   const isSelected = selectedDate === day;
-                  const isPast = day < 9;
+                  const isPast = day < 12;
 
                   return (
                     <button
                       key={day}
+                      type="button"
                       disabled={isPast}
                       onClick={() => setSelectedDate(day)}
                       style={{
                         padding: '8px 0',
-                        borderRadius: '50%',
                         fontSize: '0.84rem',
                         fontWeight: isSelected ? 800 : 500,
                         background: isSelected ? '#0d9488' : 'transparent',
                         color: isSelected ? '#ffffff' : isPast ? '#cbd5e1' : '#0f172a',
                         cursor: isPast ? 'not-allowed' : 'pointer',
-                        transition: 'all 0.15s ease',
                       }}
                     >
                       {day}
@@ -220,7 +234,7 @@ export const BookSessionPage = ({ tutor, onNavigate, onEnterVideoRoom }) => {
             {/* Available Time Slots */}
             <div className="clean-card" style={{ padding: '22px' }}>
               <h3 style={{ fontSize: '0.98rem', fontWeight: 800, color: '#0f172a', marginBottom: '14px' }}>
-                Available Time Slots (Oct {selectedDate})
+                Available Time Slots (Nov {selectedDate})
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
                 {timeSlots.map((slot) => {
@@ -228,10 +242,10 @@ export const BookSessionPage = ({ tutor, onNavigate, onEnterVideoRoom }) => {
                   return (
                     <button
                       key={slot}
+                      type="button"
                       onClick={() => setSelectedSlot(slot)}
                       style={{
                         padding: '10px 4px',
-                        borderRadius: '8px',
                         fontSize: '0.84rem',
                         fontWeight: 600,
                         border: isSlotActive ? '2px solid #0d9488' : '1px solid #e2e8f0',
@@ -255,7 +269,7 @@ export const BookSessionPage = ({ tutor, onNavigate, onEnterVideoRoom }) => {
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: '#475569' }}>
                 <Clock size={16} color="#0d9488" />
-                <span>Duration: <strong>1 hour</strong></span>
+                <span>Duration: <strong>1 hour ({sessionType === '1on1' ? '1-on-1' : 'Group'})</strong></span>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: '#475569' }}>
@@ -270,10 +284,11 @@ export const BookSessionPage = ({ tutor, onNavigate, onEnterVideoRoom }) => {
 
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '0.88rem', color: '#475569' }}>
                 <CheckCircle2 size={16} color="#0d9488" style={{ marginTop: '2px' }} />
-                <span>Format: <strong>Interactive (screen share, chat etc.)</strong></span>
+                <span>Room ID: <code>{roomId}</code></span>
               </div>
 
               <button
+                type="button"
                 onClick={handleConfirm}
                 className="btn-teal"
                 style={{ width: '100%', padding: '12px', fontSize: '0.98rem', marginTop: '10px' }}
