@@ -80,17 +80,43 @@ const completeSession = async (req, res, next) => {
     const tutor = await User.findById(session.tutor);
     const creditsToTransfer = session.creditsExchanged || 10;
 
-    // Deduct from learner if sufficient
     if (learner.credits >= creditsToTransfer) {
       learner.credits -= creditsToTransfer;
     } else {
       learner.credits = 0;
     }
-    await learner.save();
 
-    // Credit to tutor
     tutor.credits += creditsToTransfer;
-    await tutor.save();
+
+    const grantBadge = async (userDoc, name, description, icon) => {
+      if (!userDoc.badges.some((b) => b.name === name)) {
+        userDoc.badges.push({ name, description, icon });
+        await Gamification.create({
+          user: userDoc._id,
+          type: 'badge_unlocked',
+          badgeName: name,
+          description: `Unlocked badge "${name}": ${description}`,
+          session: session._id,
+        });
+      }
+    };
+
+    const [learnerCompletedCount, tutorCompletedCount] = await Promise.all([
+      Session.countDocuments({ learner: learner._id, status: 'completed' }),
+      Session.countDocuments({ tutor: tutor._id, status: 'completed' }),
+    ]);
+
+    if (learnerCompletedCount >= 1) {
+      await grantBadge(learner, 'First Step', 'Completed your first peer learning session', 'award');
+    }
+    if (learnerCompletedCount >= 3) {
+      await grantBadge(learner, 'Consistent Scholar', 'Completed 3+ peer learning sessions', 'flame');
+    }
+    if (tutorCompletedCount >= 1) {
+      await grantBadge(tutor, 'Helper', 'Mentored peers through live interactive sessions', 'shield');
+    }
+
+    await Promise.all([learner.save(), tutor.save()]);
 
     // Log gamification credit records
     await Gamification.create([

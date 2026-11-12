@@ -124,6 +124,7 @@ export const api = {
   // Gamification API
   gamification: {
     getHistory: () => request('/gamification/history'),
+    claimDailyBonus: () => request('/gamification/daily-bonus', { method: 'POST' }),
     getLeaderboard: () => request('/gamification/leaderboard'),
   },
 
