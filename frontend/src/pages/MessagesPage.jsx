@@ -15,7 +15,7 @@ export const MessagesPage = ({ onEnterVideoRoom }) => {
     {
       id: 'rohan',
       name: 'Rohan Sharma',
-      avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100',
+      avatar: '/avatars/rohan.svg',
       lastMsg: 'See you in the session!',
       time: '3:20 PM',
       online: true,
@@ -24,7 +24,7 @@ export const MessagesPage = ({ onEnterVideoRoom }) => {
     {
       id: 'priya',
       name: 'Priya Singh',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100',
+      avatar: '/avatars/priya.svg',
       lastMsg: "That's great!",
       time: '1:15 PM',
       online: false,
@@ -33,7 +33,7 @@ export const MessagesPage = ({ onEnterVideoRoom }) => {
     {
       id: 'aman',
       name: 'Aman Verma',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100',
+      avatar: '/avatars/aman.svg',
       lastMsg: "Let's schedule tomorrow",
       time: 'Oct 13',
       online: true,
@@ -42,7 +42,7 @@ export const MessagesPage = ({ onEnterVideoRoom }) => {
     {
       id: 'kritika',
       name: 'Kritika Jain',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
+      avatar: '/avatars/kritika.svg',
       lastMsg: 'Sure!',
       time: 'Oct 12',
       online: false,

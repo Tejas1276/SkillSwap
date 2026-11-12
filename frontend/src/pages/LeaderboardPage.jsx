@@ -13,12 +13,13 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
+import { getAvatarSrc } from '../utils/avatars';
 
 const FALLBACK_LEADERBOARD = [
-  { _id: 'demo-1', name: 'Aman Verma', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100', credits: 420, credibilityScore: 94.5, rating: { average: 4.9, count: 31 } },
-  { _id: 'demo-2', name: 'Rohan Sharma', avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100', credits: 380, credibilityScore: 92.0, rating: { average: 4.8, count: 25 } },
-  { _id: 'demo-3', name: 'Priya Singh', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100', credits: 240, credibilityScore: 89.5, rating: { average: 4.7, count: 18 } },
-  { _id: 'demo-4', name: 'Kritika Jain', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100', credits: 210, credibilityScore: 88.0, rating: { average: 4.9, count: 15 } },
+  { _id: 'demo-1', name: 'Aman Verma', avatar: '/avatars/aman.svg', credits: 420, credibilityScore: 94.5, rating: { average: 4.9, count: 31 } },
+  { _id: 'demo-2', name: 'Rohan Sharma', avatar: '/avatars/rohan.svg', credits: 380, credibilityScore: 92.0, rating: { average: 4.8, count: 25 } },
+  { _id: 'demo-3', name: 'Priya Singh', avatar: '/avatars/priya.svg', credits: 240, credibilityScore: 89.5, rating: { average: 4.7, count: 18 } },
+  { _id: 'demo-4', name: 'Kritika Jain', avatar: '/avatars/kritika.svg', credits: 210, credibilityScore: 88.0, rating: { average: 4.9, count: 15 } },
 ];
 
 export const LeaderboardPage = () => {
@@ -317,7 +318,7 @@ export const LeaderboardPage = () => {
                     </span>
 
                     <img
-                      src={s.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100'}
+                      src={getAvatarSrc(s.avatar, s.name)}
                       alt={s.name}
                       style={{ width: '40px', height: '40px', objectFit: 'cover' }}
                     />

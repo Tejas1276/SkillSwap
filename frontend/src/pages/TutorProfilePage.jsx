@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getAvatarSrc } from '../utils/avatars';
 import {
   CheckCircle2,
   MessageSquare,
@@ -19,7 +20,7 @@ export const TutorProfilePage = ({ tutor, onBookTutor, onNavigate }) => {
     id: 'rohan-sharma',
     name: 'Rohan Sharma',
     handle: '@rohansharma',
-    avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200',
+    avatar: '/avatars/rohan.svg',
     headline: 'B.Tech CSE | Web Developer | Love building products',
     rating: 4.8,
     sessionsCount: 23,
@@ -78,7 +79,7 @@ export const TutorProfilePage = ({ tutor, onBookTutor, onNavigate }) => {
           }}>
             <div style={{ position: 'relative' }}>
               <img
-                src={profile.avatar}
+                src={getAvatarSrc(profile.avatar, profile.name)}
                 alt={profile.name}
                 style={{
                   width: '110px',

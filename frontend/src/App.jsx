@@ -21,7 +21,7 @@ function AppContent() {
     id: 'rohan-sharma',
     name: 'Rohan Sharma',
     handle: '@rohansharma',
-    avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200',
+    avatar: '/avatars/rohan.svg',
     skill: 'Web Development',
     headline: 'B.Tech CSE | Web Developer | Love building products',
     rating: 4.8,

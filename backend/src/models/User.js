@@ -105,7 +105,7 @@ const userSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
-      default: '',
+      default: '/avatars/default.svg',
     },
     credits: {
       type: Number,

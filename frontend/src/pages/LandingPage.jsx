@@ -31,7 +31,7 @@ export const LandingPage = ({ onNavigate, onSearchSkill, onSelectTutor, onBookTu
     {
       id: 'rohan-sharma',
       name: 'Rohan Sharma',
-      avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150',
+      avatar: '/avatars/rohan.svg',
       skill: 'Web Development',
       rating: 4.8,
       sessionsCount: 23,
@@ -41,7 +41,7 @@ export const LandingPage = ({ onNavigate, onSearchSkill, onSelectTutor, onBookTu
     {
       id: 'priya-singh',
       name: 'Priya Singh',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+      avatar: '/avatars/priya.svg',
       skill: 'UI/UX Design',
       rating: 4.7,
       sessionsCount: 18,
@@ -51,7 +51,7 @@ export const LandingPage = ({ onNavigate, onSearchSkill, onSelectTutor, onBookTu
     {
       id: 'aman-verma',
       name: 'Aman Verma',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+      avatar: '/avatars/aman.svg',
       skill: 'Data Science',
       rating: 4.9,
       sessionsCount: 31,

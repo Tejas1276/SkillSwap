@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
+import { getAvatarSrc } from '../utils/avatars';
 import {
   LayoutDashboard,
   BookOpen,
@@ -57,7 +58,7 @@ export const StudentDashboard = ({ onNavigate, onSelectTutor, onBookTutor, onEnt
     {
       id: 'rohan-sharma',
       name: 'Rohan Sharma',
-      avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150',
+      avatar: '/avatars/rohan.svg',
       skill: 'Web Development',
       rating: 4.8,
       sessionsCount: 23,
@@ -66,7 +67,7 @@ export const StudentDashboard = ({ onNavigate, onSelectTutor, onBookTutor, onEnt
     {
       id: 'priya-singh',
       name: 'Priya Singh',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+      avatar: '/avatars/priya.svg',
       skill: 'UI/UX Design',
       rating: 4.7,
       sessionsCount: 18,
@@ -75,7 +76,7 @@ export const StudentDashboard = ({ onNavigate, onSelectTutor, onBookTutor, onEnt
     {
       id: 'arjun-mehta',
       name: 'Arjun Mehta',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+      avatar: '/avatars/arjun.svg',
       skill: 'Public Speaking',
       rating: 4.9,
       sessionsCount: 12,
@@ -98,7 +99,7 @@ export const StudentDashboard = ({ onNavigate, onSelectTutor, onBookTutor, onEnt
         <div className="clean-card" style={{ padding: '18px', textAlign: 'center' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
             <img
-              src={user?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}
+              src={getAvatarSrc(user?.avatar, user?.name || 'Tejas')}
               alt={user?.name || 'Tejas'}
               style={{
                 width: '64px',

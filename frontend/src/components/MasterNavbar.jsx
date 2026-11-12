@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
+import { getAvatarSrc } from '../utils/avatars';
 import { Bell, Coins, Sparkles, User, LogOut } from 'lucide-react';
 
 export const MasterNavbar = ({ activePage, setActivePage }) => {
@@ -84,7 +85,7 @@ export const MasterNavbar = ({ activePage, setActivePage }) => {
               }}
             >
               <img
-                src={user.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100'}
+                src={getAvatarSrc(user.avatar, user.name)}
                 alt={user.name || 'User'}
                 style={{
                   width: '36px',
