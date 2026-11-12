@@ -335,12 +335,14 @@ export const StudentDashboard = ({
                   Next Scheduled Session
                 </span>
                 <span style={{ background: '#ccfbf1', color: '#0d9488', fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '9999px' }}>
-                  {latestBooking ? `${latestBooking.date} • ${latestBooking.time}` : 'Tomorrow • 3:00 PM'}
+                  {latestBooking
+                    ? `${latestBooking.dateLabel || latestBooking.date} • ${latestBooking.slot || latestBooking.time}`
+                    : 'Tomorrow • 3:00 PM'}
                 </span>
               </div>
               <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
                 {latestBooking
-                  ? `${latestBooking.skill}: ${latestBooking.type} Session with ${latestBooking.tutorName}`
+                  ? `${latestBooking.skill}: ${latestBooking.sessionType || latestBooking.type || '1-on-1'} Session with ${latestBooking.tutorName}`
                   : 'Web Development: React State & Custom Hooks with Rohan Sharma'}
               </h4>
             </div>
