@@ -41,9 +41,9 @@ export const StudentDashboard = ({
 
   // My Skills tab state
   const [learnSkillInput, setLearnSkillInput] = useState('');
-  const [learnProficiency, setLearnProficiency] = useState('Beginner');
+  const [learnProficiency, setLearnProficiency] = useState('beginner');
   const [teachSkillInput, setTeachSkillInput] = useState('');
-  const [teachProficiency, setTeachProficiency] = useState('Intermediate');
+  const [teachProficiency, setTeachProficiency] = useState('intermediate');
   const [teachCredits, setTeachCredits] = useState(10);
   const [savingSkill, setSavingSkill] = useState(false);
   const [skillNotice, setSkillNotice] = useState('');
@@ -737,9 +737,9 @@ export const StudentDashboard = ({
                     onChange={(e) => setLearnProficiency(e.target.value)}
                     style={{ padding: '8px 10px' }}
                   >
-                    <option value="Beginner">Beginner</option>
-                    <option value="Intermediate">Intermediate</option>
-                    <option value="Advanced">Advanced</option>
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
                   </select>
                   <button type="submit" disabled={savingSkill} className="btn-teal" style={{ padding: '8px 14px', gap: '4px' }}>
                     <Plus size={15} />
@@ -749,11 +749,11 @@ export const StudentDashboard = ({
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {(user?.skillsToLearn?.length ? user.skillsToLearn : [
-                    { skill: 'React', targetProficiency: 'Intermediate' },
-                    { skill: 'UI/UX Design', targetProficiency: 'Beginner' },
+                    { skill: 'React', targetProficiency: 'intermediate' },
+                    { skill: 'UI/UX Design', targetProficiency: 'beginner' },
                   ]).map((item, idx) => {
                     const label = typeof item === 'string' ? item : item.skill;
-                    const level = typeof item === 'string' ? 'Active' : (item.targetProficiency || 'Beginner');
+                    const level = typeof item === 'string' ? 'Active' : (item.targetProficiency || 'beginner');
                     return (
                       <div
                         key={`${label}-${idx}`}
@@ -768,7 +768,7 @@ export const StudentDashboard = ({
                       >
                         <div>
                           <strong style={{ fontSize: '0.92rem', color: '#0f172a' }}>{label}</strong>
-                          <span style={{ marginLeft: '8px', fontSize: '0.76rem', color: '#0d9488', fontWeight: 700 }}>
+                          <span style={{ marginLeft: '8px', fontSize: '0.76rem', color: '#0d9488', fontWeight: 700, textTransform: 'capitalize' }}>
                             {level}
                           </span>
                         </div>
@@ -808,9 +808,10 @@ export const StudentDashboard = ({
                     onChange={(e) => setTeachProficiency(e.target.value)}
                     style={{ padding: '8px 10px' }}
                   >
-                    <option value="Beginner">Beginner</option>
-                    <option value="Intermediate">Intermediate</option>
-                    <option value="Expert">Expert</option>
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                    <option value="expert">Expert</option>
                   </select>
                   <input
                     type="number"

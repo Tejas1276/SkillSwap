@@ -1,17 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
-export const AuthPage = ({ onNavigate }) => {
+export const AuthPage = ({ onNavigate, initialMode = 'signup' }) => {
   const { login, register, error } = useAuth();
-  const [isLogin, setIsLogin] = useState(false); // Default to Create account as in Screen 2
+  const [isLogin, setIsLogin] = useState(initialMode === 'login');
   const [formData, setFormData] = useState({
-    name: 'Tejas Kushwaha',
-    college: 'Delhi Technological University',
-    email: 'tejas@skillswap.io',
-    password: 'password123',
+    name: '',
+    college: '',
+    email: '',
+    password: '',
   });
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState('');
+
+  useEffect(() => {
+    setIsLogin(initialMode === 'login');
+    setFormError('');
+  }, [initialMode]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

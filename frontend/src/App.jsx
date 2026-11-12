@@ -37,9 +37,18 @@ function AppContent() {
   const [messageContactName, setMessageContactName] = useState('');
   const [latestBooking, setLatestBooking] = useState(null);
   const [bookmarkedTutorIds, setBookmarkedTutorIds] = useState(['rohan-sharma', 'priya-singh']);
+  const [authMode, setAuthMode] = useState('login');
 
   const handleNavigate = (page) => {
-    setActivePage(page);
+    if (page === 'login' || page === 'auth-login') {
+      setAuthMode('login');
+      setActivePage('auth');
+    } else if (page === 'signup' || page === 'auth-signup' || page === 'auth') {
+      setAuthMode('signup');
+      setActivePage('auth');
+    } else {
+      setActivePage(page);
+    }
     if (page === 'book') {
       setSessionsSubTab('book');
     }
@@ -99,7 +108,7 @@ function AppContent() {
         )}
 
         {/* Screen 2: Sign Up / Auth Page */}
-        {activePage === 'auth' && <AuthPage onNavigate={handleNavigate} />}
+        {activePage === 'auth' && <AuthPage onNavigate={handleNavigate} initialMode={authMode} />}
 
         {/* Screen 3: Student Dashboard */}
         {activePage === 'dashboard' && (

@@ -243,14 +243,14 @@ export const MasterNavbar = ({ activePage, setActivePage }) => {
         ) : (
           <>
             <button
-              onClick={() => setActivePage('auth')}
+              onClick={() => setActivePage('login')}
               className="btn-outline-gray"
               style={{ border: 'none', fontWeight: 600 }}
             >
               Login
             </button>
             <button
-              onClick={() => setActivePage('auth')}
+              onClick={() => setActivePage('signup')}
               className="btn-teal"
             >
               Sign Up
