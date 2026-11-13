@@ -6,6 +6,7 @@ dotenv.config();
 
 const app = require('./app');
 const { connectDB, disconnectDB } = require('./config/db');
+const { ensureDemoUsers } = require('./config/ensureDemoUsers');
 const { initWebRTCSignaling } = require('./signaling/webrtcSignaling');
 
 const PORT = process.env.PORT || 5000;
@@ -16,6 +17,7 @@ let io;
 const startServer = async () => {
   try {
     await connectDB();
+    await ensureDemoUsers();
     server = http.createServer(app);
     io = initWebRTCSignaling(server);
 
