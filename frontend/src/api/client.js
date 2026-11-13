@@ -32,17 +32,6 @@ const request = async (endpoint, options = {}) => {
 export const api = {
   // Auth API
   auth: {
-    sendOtp: (userData) =>
-      request('/auth/send-otp', {
-        method: 'POST',
-        body: JSON.stringify(userData),
-      }),
-    verifyOtp: (payload) =>
-      request('/auth/verify-otp', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      }),
-    getProviders: () => request('/auth/providers'),
     register: (userData) =>
       request('/auth/register', {
         method: 'POST',

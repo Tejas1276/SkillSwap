@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { MasterNavbar } from './components/MasterNavbar';
 
@@ -15,7 +15,7 @@ import { LeaderboardPage } from './pages/LeaderboardPage';   // Screen 8: Leader
 import { MessagesPage } from './pages/MessagesPage';         // Screen 9: Messages / Chat
 
 function AppContent() {
-  const { user, oauthRedirectTarget, clearOauthRedirect } = useAuth();
+  const { user } = useAuth();
   const [activePage, setActivePage] = useState('home');
   const [sessionsSubTab, setSessionsSubTab] = useState('book'); // 'book' | 'manage'
   const [selectedTutor, setSelectedTutor] = useState({
@@ -38,17 +38,6 @@ function AppContent() {
   const [latestBooking, setLatestBooking] = useState(null);
   const [bookmarkedTutorIds, setBookmarkedTutorIds] = useState(['rohan-sharma', 'priya-singh']);
   const [authMode, setAuthMode] = useState('login');
-
-  useEffect(() => {
-    if (oauthRedirectTarget === 'dashboard') {
-      setActivePage('dashboard');
-      clearOauthRedirect();
-    } else if (oauthRedirectTarget === 'login') {
-      setAuthMode('login');
-      setActivePage('auth');
-      clearOauthRedirect();
-    }
-  }, [oauthRedirectTarget, clearOauthRedirect]);
 
   const handleNavigate = (page) => {
     if (page === 'login' || page === 'auth-login') {
