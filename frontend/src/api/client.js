@@ -1,5 +1,5 @@
 // Skill Swap API Client
-const API_BASE = '/api';
+const API_BASE = (import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/+$/, '') : '') + '/api';
 
 const getAuthToken = () => localStorage.getItem('skillswap_token');
 
